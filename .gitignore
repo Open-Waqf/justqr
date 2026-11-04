@@ -1,0 +1,21 @@
+node_modules
+dist
+coverage
+*.local
+*.log
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+
+# Android release signing (the key itself lives in the Cryptomator vault)
+*.jks
+*.keystore
+android/keystore.properties

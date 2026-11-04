@@ -1,0 +1,12 @@
+{
+  "//": "The plain JavaScript scripts are checked too, without strict types: this catches typos, wrong Node APIs and unknown names.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "types": ["node"]
+  },
+  "include": ["scripts"]
+}
