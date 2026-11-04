@@ -84,6 +84,15 @@ const EN_MESSAGES = {
     'warn.inverted':
         'The code is lighter than its background. Many phones only scan dark codes on a light background.',
     'warn.no_margin': 'No margin: leave white space around the code wherever you print it.',
+    'style.logo': 'Logo',
+    'style.logo_add': 'Add a logo',
+    'style.logo_help': 'A picture from your phone in the middle of the code. It stays on your phone.',
+    'style.logo_change': 'Change',
+    'style.logo_remove': 'Remove',
+    'style.logo_size': 'Logo size',
+    'style.ec_logo': 'With a logo, H is always used, so the code still scans.',
+    'warn.logo_large': 'The logo is large. Some phones may not scan this code. Try a smaller logo.',
+    'toast.logo_failed': 'This picture could not be opened. Try another one.',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;
@@ -158,6 +167,15 @@ const AR_MESSAGES: Messages = {
         'اللونان متقاربان جدًا. قد لا تتمكن بعض الهواتف من مسح هذا الرمز. استخدم رمزًا أغمق أو خلفية أفتح.',
     'warn.inverted': 'الرمز أفتح من خلفيته. كثير من الهواتف لا تمسح إلا الرموز الداكنة على خلفية فاتحة.',
     'warn.no_margin': 'بلا هامش: اترك مساحة بيضاء حول الرمز أينما طبعته.',
+    'style.logo': 'الشعار',
+    'style.logo_add': 'إضافة شعار',
+    'style.logo_help': 'صورة من هاتفك في وسط الرمز. تبقى على هاتفك.',
+    'style.logo_change': 'تغيير',
+    'style.logo_remove': 'إزالة',
+    'style.logo_size': 'حجم الشعار',
+    'style.ec_logo': 'مع الشعار يُستخدم المستوى H دائمًا، ليبقى الرمز قابلًا للمسح.',
+    'warn.logo_large': 'الشعار كبير. قد لا تتمكن بعض الهواتف من مسح هذا الرمز. جرّب شعارًا أصغر.',
+    'toast.logo_failed': 'تعذّر فتح هذه الصورة. جرّب صورة أخرى.',
 };
 
 const FR_MESSAGES: Messages = {
@@ -232,6 +250,16 @@ const FR_MESSAGES: Messages = {
     'warn.inverted':
         'Le code est plus clair que son fond. Beaucoup de téléphones ne scannent que des codes foncés sur fond clair.',
     'warn.no_margin': 'Pas de marge : laissez un espace blanc autour du code là où vous l’imprimez.',
+    'style.logo': 'Logo',
+    'style.logo_add': 'Ajouter un logo',
+    'style.logo_help': 'Une image de votre téléphone au milieu du code. Elle reste sur votre téléphone.',
+    'style.logo_change': 'Changer',
+    'style.logo_remove': 'Retirer',
+    'style.logo_size': 'Taille du logo',
+    'style.ec_logo': 'Avec un logo, H est toujours utilisé, pour que le code reste lisible.',
+    'warn.logo_large':
+        'Le logo est grand. Certains téléphones risquent de ne pas scanner ce code. Essayez un logo plus petit.',
+    'toast.logo_failed': 'Impossible d’ouvrir cette image. Essayez-en une autre.',
 };
 
 const ES_MESSAGES: Messages = {
@@ -306,6 +334,16 @@ const ES_MESSAGES: Messages = {
     'warn.inverted':
         'El código es más claro que su fondo. Muchos teléfonos solo escanean códigos oscuros sobre fondo claro.',
     'warn.no_margin': 'Sin margen: deja espacio blanco alrededor del código donde lo imprimas.',
+    'style.logo': 'Logo',
+    'style.logo_add': 'Añadir un logo',
+    'style.logo_help': 'Una imagen de tu teléfono en el centro del código. Se queda en tu teléfono.',
+    'style.logo_change': 'Cambiar',
+    'style.logo_remove': 'Quitar',
+    'style.logo_size': 'Tamaño del logo',
+    'style.ec_logo': 'Con un logo siempre se usa H, para que el código se siga escaneando.',
+    'warn.logo_large':
+        'El logo es grande. Algunos teléfonos quizá no escaneen este código. Prueba con un logo más pequeño.',
+    'toast.logo_failed': 'No se ha podido abrir esta imagen. Prueba con otra.',
 };
 
 const IT_MESSAGES: Messages = {
@@ -380,6 +418,16 @@ const IT_MESSAGES: Messages = {
     'warn.inverted':
         'Il codice è più chiaro del suo sfondo. Molti telefoni leggono solo codici scuri su sfondo chiaro.',
     'warn.no_margin': 'Nessun margine: lascia spazio bianco intorno al codice dove lo stampi.',
+    'style.logo': 'Logo',
+    'style.logo_add': 'Aggiungi un logo',
+    'style.logo_help': 'Un’immagine dal tuo telefono al centro del codice. Resta sul tuo telefono.',
+    'style.logo_change': 'Cambia',
+    'style.logo_remove': 'Rimuovi',
+    'style.logo_size': 'Dimensione del logo',
+    'style.ec_logo': 'Con un logo si usa sempre H, così il codice resta leggibile.',
+    'warn.logo_large':
+        'Il logo è grande. Alcuni telefoni potrebbero non leggere questo codice. Prova un logo più piccolo.',
+    'toast.logo_failed': 'Impossibile aprire questa immagine. Prova con un’altra.',
 };
 
 const MESSAGES: Record<Locale, Messages> = {

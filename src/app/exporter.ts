@@ -5,7 +5,8 @@
 // here (pngBlob, svgText) stay the same.
 import type {CodeType} from '../lib/payload';
 import type {Matrix} from '../lib/qr';
-import {type CodeStyle, scaleFor, toPixels, toSvg} from '../lib/render';
+import {type CodeStyle, type Logo, logoRect, scaleFor, toPixels, toSvg} from '../lib/render';
+import {logoImage} from './logo-image';
 
 export interface ExportCode {
     matrix: Matrix;
@@ -14,6 +15,7 @@ export interface ExportCode {
     payload: string;
     /** Wanted image width in pixels. */
     px: number;
+    logo: Logo | null;
 }
 
 /** "just-qr-wifi-2026-11-04" */
@@ -25,18 +27,28 @@ export function baseName(type: CodeType, date = new Date()): string {
 }
 
 export function svgText(code: ExportCode): string {
-    return `<?xml version="1.0" encoding="UTF-8"?>\n${toSvg(code.matrix, code.style, code.px)}\n`;
+    return `<?xml version="1.0" encoding="UTF-8"?>\n${toSvg(code.matrix, code.style, code.px, code.logo ?? undefined)}\n`;
 }
 
 export async function pngBlob(code: ExportCode): Promise<Blob> {
     const scale = scaleFor(code.matrix, code.style.margin, code.px);
-    const pixels = toPixels(code.matrix, code.style, scale);
+    const pixels = toPixels(code.matrix, code.style, scale, code.logo?.ratio);
     const canvas = document.createElement('canvas');
     canvas.width = pixels.width;
     canvas.height = pixels.height;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('No canvas');
     ctx.putImageData(new ImageData(new Uint8ClampedArray(pixels.data), pixels.width, pixels.height), 0, 0);
+    if (code.logo) {
+        // The logo keeps its shape and fits inside the square cleared for it.
+        const img = await logoImage(code.logo.href);
+        const box = logoRect(code.matrix, code.style, scale, code.logo.ratio);
+        const fit = Math.min(box.size / img.naturalWidth, box.size / img.naturalHeight);
+        const w = img.naturalWidth * fit;
+        const h = img.naturalHeight * fit;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, box.x + (box.size - w) / 2, box.y + (box.size - h) / 2, w, h);
+    }
     return new Promise((done, fail) =>
         canvas.toBlob((blob) => (blob ? done(blob) : fail(new Error('PNG failed'))), 'image/png'),
     );
@@ -104,7 +116,7 @@ export function print(code: ExportCode): void {
         document.body.append(area);
     }
     const img = document.createElement('img');
-    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(toSvg(code.matrix, code.style, code.px))}`;
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText(code))}`;
     img.alt = '';
     area.replaceChildren(img);
     img.decode().finally(() => window.print());

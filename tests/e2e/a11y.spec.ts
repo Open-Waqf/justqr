@@ -14,6 +14,15 @@ for (const theme of ['light', 'dark', 'oled'] as const) {
         await page.getByTestId('style-toggle').click();
         await page.getByTestId('style-margin-0').click();
         await expectAccessible(page);
+        // With a logo and its size slider.
+        await page.getByTestId('logo-file').setInputFiles({
+            name: 'logo.svg',
+            mimeType: 'image/svg+xml',
+            buffer: Buffer.from(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>',
+            ),
+        });
+        await expectAccessible(page);
         // And with the "more" menu open.
         await page.getByTestId('btn-more').click();
         await expectAccessible(page);

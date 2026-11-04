@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
-import {DEFAULT_LOOK, isDefaultLook, lookWarnings} from '../../src/lib/look';
+import {DEFAULT_LOOK, effectiveEc, isDefaultLook, lookWarnings} from '../../src/lib/look';
+import {LOGO_MAX, LOGO_WARN} from '../../src/lib/render';
 
 describe('look', () => {
     it('the default look has no warning', () => {
@@ -17,5 +18,20 @@ describe('look', () => {
         expect(isDefaultLook({...DEFAULT_LOOK, px: 2048})).toBe(false);
         expect(isDefaultLook({...DEFAULT_LOOK, margin: 2})).toBe(false);
         expect(isDefaultLook({...DEFAULT_LOOK, bg: '#fafafa'})).toBe(false);
+    });
+});
+
+describe('logo', () => {
+    const logo = {href: 'data:image/png;base64,AA', ratio: 0.2};
+    it('forces error correction H, and gives the choice back when removed', () => {
+        expect(effectiveEc({...DEFAULT_LOOK, ec: 'L', logo})).toBe('H');
+        expect(effectiveEc({...DEFAULT_LOOK, ec: 'L', logo: null})).toBe('L');
+    });
+    it('warns above the warning size only', () => {
+        expect(lookWarnings({...DEFAULT_LOOK, logo: {...logo, ratio: LOGO_WARN}})).toEqual([]);
+        expect(lookWarnings({...DEFAULT_LOOK, logo: {...logo, ratio: LOGO_MAX}})).toEqual(['logo-large']);
+    });
+    it('a logo is not the default look', () => {
+        expect(isDefaultLook({...DEFAULT_LOOK, logo})).toBe(false);
     });
 });

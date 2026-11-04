@@ -1,7 +1,7 @@
 import {css, html, nothing, type TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {type MessageKey, t} from '../lib/i18n';
-import {DEFAULT_LOOK, type Look, type LookWarning, lookWarnings} from '../lib/look';
+import {DEFAULT_LOOK, effectiveEc, type Look, type LookWarning, lookWarnings} from '../lib/look';
 import {buildPayload, CODE_TYPES, type CodeType, emptyFields, type FieldsByType} from '../lib/payload';
 import {byteLength, MAX_BYTES, type Matrix, makeMatrix, TooLongError} from '../lib/qr';
 import {toSvg} from '../lib/render';
@@ -35,6 +35,7 @@ const WARNING: Record<LookWarning, MessageKey> = {
     'low-contrast': 'warn.low_contrast',
     inverted: 'warn.inverted',
     'no-margin': 'warn.no_margin',
+    'logo-large': 'warn.logo_large',
 };
 
 /** Share of the capacity above which the "almost full" hint shows. */
@@ -49,11 +50,12 @@ export type Preview =
 export function preview(payload: string, look: Look): Preview {
     if (!payload) return {kind: 'empty'};
     try {
-        const m = makeMatrix(payload, look.ec);
+        const ec = effectiveEc(look);
+        const m = makeMatrix(payload, ec);
         return {
             kind: 'code',
-            svg: toSvg(m, look, 512),
-            almostFull: byteLength(payload) > MAX_BYTES[look.ec] * ALMOST_FULL,
+            svg: toSvg(m, look, 512, look.logo ?? undefined),
+            almostFull: byteLength(payload) > MAX_BYTES[ec] * ALMOST_FULL,
             payload,
             matrix: m,
         };
@@ -382,7 +384,15 @@ export class MakePage extends LocalizedElement {
 
     private exportCode(p: Preview): ExportCode | null {
         if (p.kind !== 'code') return null;
-        return {matrix: p.matrix, style: this.look, type: this.type, payload: p.payload, px: this.look.px};
+        const {look} = this;
+        return {
+            matrix: p.matrix,
+            style: look,
+            type: this.type,
+            payload: p.payload,
+            px: look.px,
+            logo: look.logo,
+        };
     }
 
     private say(key: MessageKey) {
@@ -545,6 +555,7 @@ export class MakePage extends LocalizedElement {
             </p>
             <jq-style
                 .look=${this.look}
+                @logo-error=${() => this.say('toast.logo_failed')}
                 @look-change=${(e: CustomEvent<Look>) => {
                     this.look = e.detail;
                 }}

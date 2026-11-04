@@ -1,8 +1,10 @@
 import {css, html, nothing, type TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {type MessageKey, t} from '../lib/i18n';
-import {DEFAULT_LOOK, isDefaultLook, type Look, MARGINS, SIZES} from '../lib/look';
+import {DEFAULT_LOOK, effectiveEc, isDefaultLook, type Look, MARGINS, SIZES} from '../lib/look';
 import {EC_LEVELS} from '../lib/qr';
+import {LOGO_DEFAULT, LOGO_MAX, LOGO_MIN} from '../lib/render';
+import {LogoError, readLogo} from './logo-image';
 import {formStyles, LocalizedElement, nextOf, radioStep} from './ui';
 
 /** The closed "Style" section under the code. Sends `look-change` with the new Look. */
@@ -66,6 +68,43 @@ export class StylePanel extends LocalizedElement {
                 font-family: ui-monospace, monospace;
                 direction: ltr;
             }
+            .action {
+                min-height: 44px;
+                padding: 0 16px;
+                border-radius: 10px;
+                border: 1px solid var(--line);
+                background: var(--surface);
+                color: var(--text);
+                font: inherit;
+                cursor: pointer;
+            }
+            .logo-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .logo-thumb {
+                width: 44px;
+                height: 44px;
+                object-fit: contain;
+                border-radius: 8px;
+                border: 1px solid var(--divider);
+                background: #ffffff;
+            }
+            input[type='range'] {
+                padding: 0;
+                min-height: 32px;
+                border: 0;
+                background: none;
+                accent-color: var(--accent);
+            }
+            .seg button:disabled {
+                cursor: default;
+            }
+            .seg button:disabled:not([aria-checked='true']) {
+                color: var(--muted);
+            }
             .reset {
                 margin: 16px 0 8px;
                 min-height: 44px;
@@ -94,6 +133,7 @@ export class StylePanel extends LocalizedElement {
         current: T,
         show: (v: T) => string,
         set: (v: T) => void,
+        disabled = false,
     ): TemplateResult {
         const onKey = (e: KeyboardEvent) => {
             const step = radioStep(e, this);
@@ -113,6 +153,7 @@ export class StylePanel extends LocalizedElement {
                             data-testid=${`${id}-${v}`}
                             aria-checked=${v === current ? 'true' : 'false'}
                             tabindex=${v === current ? 0 : -1}
+                            ?disabled=${disabled}
                             @click=${() => set(v)}
                         >
                             ${show(v)}
@@ -137,6 +178,71 @@ export class StylePanel extends LocalizedElement {
         </div>`;
     }
 
+    private async pick(e: Event) {
+        const input = e.target as HTMLInputElement;
+        const file = input.files?.[0];
+        input.value = '';
+        if (!file) return;
+        try {
+            const href = await readLogo(file);
+            this.change({logo: {href, ratio: this.look.logo?.ratio ?? LOGO_DEFAULT}});
+        } catch (err) {
+            if (!(err instanceof LogoError)) throw err;
+            this.dispatchEvent(new CustomEvent('logo-error', {bubbles: true, composed: true}));
+        }
+    }
+
+    private renderLogo(): TemplateResult {
+        const logo = this.look.logo;
+        const picker = html`<input
+            id="logo-file"
+            data-testid="logo-file"
+            type="file"
+            accept="image/*"
+            hidden
+            @change=${this.pick}
+        />`;
+        if (!logo) {
+            return html`<label>${t('style.logo')}</label>${picker}
+                <button
+                    class="action"
+                    data-testid="logo-add"
+                    @click=${() => this.renderRoot.querySelector<HTMLInputElement>('#logo-file')?.click()}
+                >
+                    ${t('style.logo_add')}
+                </button>
+                <p class="help">${t('style.logo_help')}</p>`;
+        }
+        const pct = Math.round(logo.ratio * 100);
+        return html`<label>${t('style.logo')}</label>${picker}
+            <div class="logo-row">
+                <img class="logo-thumb" data-testid="logo-thumb" src=${logo.href} alt="" />
+                <button
+                    class="action"
+                    data-testid="logo-change"
+                    @click=${() => this.renderRoot.querySelector<HTMLInputElement>('#logo-file')?.click()}
+                >
+                    ${t('style.logo_change')}
+                </button>
+                <button class="action" data-testid="logo-remove" @click=${() => this.change({logo: null})}>
+                    ${t('style.logo_remove')}
+                </button>
+            </div>
+            <label for="logo-size">${t('style.logo_size')}: ${pct}%</label>
+            <input
+                id="logo-size"
+                data-testid="logo-size"
+                type="range"
+                min=${LOGO_MIN}
+                max=${LOGO_MAX}
+                step="0.025"
+                .value=${String(logo.ratio)}
+                aria-valuetext=${`${pct}%`}
+                @input=${(e: Event) =>
+                    this.change({logo: {...logo, ratio: Number((e.target as HTMLInputElement).value)}})}
+            />`;
+    }
+
     render() {
         const look = this.look;
         const plain = isDefaultLook(look);
@@ -149,6 +255,7 @@ export class StylePanel extends LocalizedElement {
             <div class="colours">
                 ${this.colour('style-fg', 'style.fg', look.fg, 'fg')} ${this.colour('style-bg', 'style.bg', look.bg, 'bg')}
             </div>
+            ${this.renderLogo()}
             ${this.segment(
                 'style-size',
                 'style.size',
@@ -162,11 +269,12 @@ export class StylePanel extends LocalizedElement {
                 'style-ec',
                 'style.ec',
                 EC_LEVELS,
-                look.ec,
+                effectiveEc(look),
                 (v) => v,
                 (ec) => this.change({ec}),
+                !!look.logo,
             )}
-            <p class="help">${t('style.ec_help')}</p>
+            <p class="help">${look.logo ? t('style.ec_logo') : t('style.ec_help')}</p>
             ${this.segment(
                 'style-margin',
                 'style.margin',
