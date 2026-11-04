@@ -7,7 +7,7 @@ they stop working unless you pay, and printed menus and posters go dead. Just QR
 plain (static) codes: your link or text is inside the code itself. No server is involved,
 so the code works forever and nobody can see who scans it.
 
-Part of the [Open Waqf](https://open-waqf.org) apps.
+Part of the [Open Waqf](https://open-waqf.org) apps. [Privacy policy](docs/PRIVACY.md): nothing is collected.
 
 ## Development
 
@@ -81,7 +81,14 @@ makes GitHub test again and deploy qr.open-waqf.org. Then it builds the signed b
 Google Play (`npm run android:release`, also on its own) and checks the upload key and that
 the store app has no INTERNET. Upload the `.aab` it prints in Play Console yourself.
 
-More: [docs/TESTING.md](docs/TESTING.md), [docs/TRANSLATIONS.md](docs/TRANSLATIONS.md).
+More: [docs/TESTING.md](docs/TESTING.md), [docs/TRANSLATIONS.md](docs/TRANSLATIONS.md),
+[docs/PRIVACY.md](docs/PRIVACY.md).
+
+### Store pictures and texts
+
+`npm run build && npm run play:screenshots` writes the Play Store screenshots (1080 x 2160,
+six per language, taken from the real app) and the 1024 x 500 banners into
+`~/Downloads/qr-release/`. The store texts live there too, outside the repo.
 
 ## Licence
 
