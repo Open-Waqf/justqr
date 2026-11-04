@@ -22,6 +22,16 @@ updates:
           - dependency-name: "@types/node"
             update-types: ["version-update:semver-major"]
 
+    # Android build files (Gradle plugin, AndroidX). Capacitor's own Android code comes with npm.
+    - package-ecosystem: gradle
+      directory: "/android"
+      target-branch: develop
+      schedule:
+          interval: monthly
+      groups:
+          gradle:
+              patterns: ["*"]
+
     - package-ecosystem: github-actions
       directory: "/"
       target-branch: develop

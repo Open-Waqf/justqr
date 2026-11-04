@@ -1,0 +1,32 @@
+# A saved code is in History; the phone's Back button leaves History, then Settings.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "f-url"
+    timeout: 20000
+- tapOn:
+    id: "f-url"
+- inputText: "open-waqf.org/history"
+- hideKeyboard
+- tapOn:
+    id: "btn-save"
+- assertVisible: ".*Documents/Just QR.*"
+- tapOn:
+    id: "btn-history"
+- assertVisible:
+    id: "history-list"
+# The whole row is one button: the phone reads label and date as one text.
+- assertVisible: ".*open-waqf.org/history.*"
+- pressKey: back
+- assertVisible:
+    id: "f-url"
+- tapOn:
+    id: "btn-settings"
+- assertVisible:
+    id: "language"
+- pressKey: back
+- assertVisible:
+    id: "f-url"

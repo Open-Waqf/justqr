@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Test builds only ("Just QR Dev"): INTERNET lets `npm run android:live` load the app from
+     this computer over the USB cable. The Play Store build has no INTERNET permission
+     (src/main/AndroidManifest.xml; checked by scripts/check-android-permissions.mjs). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" tools:node="replace" />
+</manifest>

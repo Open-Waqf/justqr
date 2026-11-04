@@ -6,6 +6,7 @@ import './history-page';
 import './make-page';
 import './settings-page';
 import type {MakePage} from './make-page';
+import {onBackButton} from './native';
 import {hiddenStyles, LocalizedElement} from './ui';
 
 type Route = 'make' | 'history' | 'settings';
@@ -25,7 +26,9 @@ export class AppRoot extends LocalizedElement {
         :host {
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
             min-height: 100%;
+            padding-top: var(--inset-top);
             max-width: 560px;
             margin: 0 auto;
         }
@@ -127,6 +130,15 @@ export class AppRoot extends LocalizedElement {
     firstUpdated(): void {
         // The startup test reads this mark (tests/e2e/startup.spec.ts).
         performance.mark('jq-ready');
+        // Android Back: close the menu, then leave History or Settings, then leave the app.
+        onBackButton(() => {
+            if (this.make.closeMenu()) return true;
+            if (this.route !== 'make') {
+                this.goBack();
+                return true;
+            }
+            return false;
+        });
     }
 
     private goBack() {
@@ -153,20 +165,20 @@ export class AppRoot extends LocalizedElement {
             <header class=${sub ? 'sub' : ''} dir=${dir}>
                 ${
                     sub
-                        ? html`<button class="icon back" data-testid="btn-back" aria-label=${t('nav.back')} @click=${this.goBack}>
+                        ? html`<button class="icon back" id="btn-back" data-testid="btn-back" aria-label=${t('nav.back')} @click=${this.goBack}>
                                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
                               </button>
                               <h1>${this.route === 'history' ? t('history.title') : t('settings.title')}</h1>`
                         : html`<h1>Just QR</h1>
-                              <button class="icon" data-testid="btn-history" aria-label=${t('history.title')} @click=${() => this.open('history')}>
+                              <button class="icon" id="btn-history" data-testid="btn-history" aria-label=${t('history.title')} @click=${() => this.open('history')}>
                                   <svg viewBox="0 0 24 24" aria-hidden="true">
                                       <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2" />
                                   </svg>
                               </button>
-                              <button class="icon" data-testid="btn-settings" aria-label=${t('settings.title')} @click=${() => this.open('settings')}>
+                              <button class="icon" id="btn-settings" data-testid="btn-settings" aria-label=${t('settings.title')} @click=${() => this.open('settings')}>
                                   <svg viewBox="0 0 24 24" aria-hidden="true">
                                       <circle cx="12" cy="12" r="3" />
-                                      <path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
+                                      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
                                   </svg>
                               </button>`
                 }
@@ -175,7 +187,7 @@ export class AppRoot extends LocalizedElement {
                 this.applyUpdate
                     ? html`<p class="update" role="status" data-testid="update-ready">
                           <span>${t('update.ready')}</span>
-                          <button data-testid="update-apply" @click=${() => this.applyUpdate?.()}>${t('update.apply')}</button>
+                          <button id="update-apply" data-testid="update-apply" @click=${() => this.applyUpdate?.()}>${t('update.apply')}</button>
                       </p>`
                     : nothing
             }

@@ -148,7 +148,7 @@ export class HistoryPage extends LocalizedElement {
             .toast {
                 position: fixed;
                 left: 50%;
-                bottom: calc(24px + env(safe-area-inset-bottom));
+                bottom: calc(24px + var(--inset-bottom));
                 transform: translateX(-50%);
                 display: flex;
                 align-items: center;
@@ -182,9 +182,17 @@ export class HistoryPage extends LocalizedElement {
     @state() private removed: SavedCode | null = null;
     private undoTimer = 0;
 
+    private onChanged = () => void this.refresh();
+
     connectedCallback(): void {
         super.connectedCallback();
+        window.addEventListener('jq-history-changed', this.onChanged);
         void this.refresh();
+    }
+
+    disconnectedCallback(): void {
+        window.removeEventListener('jq-history-changed', this.onChanged);
+        super.disconnectedCallback();
     }
 
     async refresh(): Promise<void> {
@@ -266,8 +274,8 @@ export class HistoryPage extends LocalizedElement {
         return html`
             ${
                 this.codes.length === 0
-                    ? html`<p class="empty" data-testid="history-empty">${t('history.empty')}</p>`
-                    : html`<ul style="list-style:none;margin:0;padding:0" data-testid="history-list">
+                    ? html`<p class="empty" id="history-empty" data-testid="history-empty">${t('history.empty')}</p>`
+                    : html`<ul style="list-style:none;margin:0;padding:0" id="history-list" data-testid="history-list">
                           ${this.codes.map((c) => this.renderItem(c))}
                       </ul>`
             }
@@ -300,7 +308,7 @@ export class HistoryPage extends LocalizedElement {
                                     </div>`
                                   : html`<button
                                         class="link"
-                                        data-testid="history-clear"
+                                        id="history-clear" data-testid="history-clear"
                                         @click=${() => {
                                             this.confirmClear = true;
                                         }}

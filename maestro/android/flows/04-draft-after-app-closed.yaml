@@ -1,0 +1,29 @@
+# What was typed survives Android closing the app (draft autosave).
+# Home sends the app to the background (the draft is saved at once), then the app is
+# stopped and started again: the form comes back with "Back where you left off".
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "f-url"
+    timeout: 20000
+- tapOn:
+    id: "type-wifi"
+- tapOn:
+    id: "f-ssid"
+- inputText: "Maestro Wi-Fi"
+- hideKeyboard
+- pressKey: home
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "draft-restored"
+    timeout: 20000
+- assertVisible: ".*Maestro Wi-Fi.*"
+- tapOn:
+    id: "draft-fresh"
+- assertNotVisible:
+    id: "draft-restored"

@@ -31,3 +31,17 @@ touches startup, compare the number before and after.
 
 When adding a guard, check once that it fails on purpose (a throwaway test that breaks the
 rule), then delete that test. Done for the network guard and axe on 2026-11-04.
+
+## Android
+
+- `tests/e2e/android.spec.ts` runs the app with a fake Android bridge
+  (`tests/e2e/support/native-fake.ts`, from Signer): save to Documents, share, Back button,
+  system bars, file names that never collide. Fast, runs in `npm run check`.
+- `maestro/android/` flows run on the real phone (`npm run test:android`): save (the script then
+  checks a new PNG is in `Documents/Just QR`), the real share sheet, History and Back, the
+  draft after Android closes the app, Arabic. Select by HTML `id` only, no "if visible" steps.
+- `npm run check:android` reads the release APK: no permissions, no trackers.
+
+Found on the phone, not in the browser (Nov 2026): the app drew under the status bar (Android
+draws edge to edge; Capacitor gives the bar heights as `--safe-area-inset-*`), and two saves the
+same day used the same file name (now the time is in the name, and a taken name gets `-2`).

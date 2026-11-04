@@ -1,0 +1,23 @@
+# Share opens the real Android share sheet with the PNG; Back closes it and the app is fine.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "f-url"
+    timeout: 20000
+- tapOn:
+    id: "f-url"
+- inputText: "open-waqf.org/share"
+- hideKeyboard
+- tapOn:
+    id: "btn-share"
+# The share sheet belongs to Android, not the app: the app's Save button is covered.
+- extendedWaitUntil:
+    notVisible:
+      id: "btn-save"
+    timeout: 10000
+- pressKey: back
+- assertVisible:
+    id: "btn-share"

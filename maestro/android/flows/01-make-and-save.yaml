@@ -1,0 +1,20 @@
+# The app opens on "make a code", the code appears while typing, Save writes a PNG into
+# Documents/Just QR (test-android.mjs then checks the file is on the phone).
+# The toast must say where the file went: a "did not work" toast would fail here.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil: # the first start after an install can take a few seconds
+    visible:
+      id: "f-url"
+    timeout: 20000
+- tapOn:
+    id: "f-url"
+- inputText: "open-waqf.org/maestro"
+- hideKeyboard
+- assertVisible:
+    id: "preview-img"
+- tapOn:
+    id: "btn-save"
+- assertVisible: ".*Documents/Just QR.*"

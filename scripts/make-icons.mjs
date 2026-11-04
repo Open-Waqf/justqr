@@ -24,6 +24,21 @@ const icons = [
     {file: 'icon-maskable-512.png', size: 512, pad: 0.12, bg: '#0b6e6a'},
 ];
 
+// Android adaptive icon sources for `npx @capacitor/assets generate --android` (in assets/):
+// the white glyph alone (foreground, inside the middle 66% that every phone shows) and the
+// teal background. The glyph is the icon without its own rounded square.
+const glyph = svg
+    .replace(/<rect width="48" height="48" rx="10" fill="#0b6e6a"\/>/, '')
+    .replace('viewBox="0 0 48 48"', 'viewBox="-12 -12 72 72"');
+const glyphData = `data:image/svg+xml;base64,${Buffer.from(glyph).toString('base64')}`;
+const ASSETS = path.join(ROOT, 'assets');
+fs.mkdirSync(ASSETS, {recursive: true});
+const androidIcons = [
+    {file: 'icon-foreground.png', img: glyphData, bg: 'transparent'},
+    {file: 'icon-background.png', img: null, bg: '#0b6e6a'},
+    {file: 'icon-only.png', img: glyphData, bg: '#0b6e6a'},
+];
+
 const browser = await chromium.launch();
 const page = await browser.newPage();
 for (const {file, size, pad, bg} of icons) {
@@ -36,4 +51,15 @@ for (const {file, size, pad, bg} of icons) {
     await page.screenshot({path: path.join(DIR, file), omitBackground: bg === 'transparent'});
     console.log(`✓ ${file} (${size} px)`);
 }
+for (const {file, img, bg} of androidIcons) {
+    await page.setViewportSize({width: 1024, height: 1024});
+    await page.setContent(
+        `<body style="margin:0;background:${bg};width:1024px;height:1024px">` +
+            (img ? `<img src="${img}" width="1024" height="1024">` : '') +
+            '</body>',
+    );
+    await page.screenshot({path: path.join(ASSETS, file), omitBackground: bg === 'transparent'});
+    console.log(`✓ assets/${file} (1024 px)`);
+}
 await browser.close();
+console.log('Android: run `npx @capacitor/assets generate --android` to make the app icons from assets/.');

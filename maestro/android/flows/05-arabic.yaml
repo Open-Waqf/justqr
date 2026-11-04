@@ -1,0 +1,22 @@
+# Switching to Arabic in Settings: the app turns right to left and stays Arabic after a restart.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "f-url"
+    timeout: 20000
+- tapOn:
+    id: "btn-settings"
+- tapOn:
+    id: "language"
+- tapOn: "العربية"
+- assertVisible: "الإعدادات"
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "f-url"
+    timeout: 20000
+- assertVisible: "رابط"

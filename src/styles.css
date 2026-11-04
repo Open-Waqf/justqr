@@ -67,6 +67,13 @@
     --warn-line: #8a6d1e;
 }
 
+/* Room for the phone's status bar and navigation bar. The Android app draws under them
+   (edge to edge): Capacitor gives their heights as --safe-area-inset-*; browsers as env(). */
+:root {
+    --inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+    --inset-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+}
+
 html,
 body {
     margin: 0;

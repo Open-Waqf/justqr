@@ -179,3 +179,19 @@ test('History in Arabic: right to left, nothing cut off, dates in Arabic @rtl-on
     expect(overflow).toBeLessThanOrEqual(0);
     await expect(items(page).first()).toContainText('رابط');
 });
+
+test('History shows a code saved just before it was opened', async ({page}) => {
+    // A slow phone: making the PNG takes a moment, so History opens before the save is done.
+    await page.addInitScript(() => {
+        const toBlob = HTMLCanvasElement.prototype.toBlob;
+        HTMLCanvasElement.prototype.toBlob = function (...args) {
+            setTimeout(() => toBlob.apply(this, args), 600);
+        };
+    });
+    await openApp(page);
+    await page.getByTestId('f-url').fill('a.org');
+    // Tap History at once, before the save has finished writing.
+    await page.getByTestId('btn-save').click();
+    await page.getByTestId('btn-history').click();
+    await expect(items(page)).toHaveCount(1);
+});

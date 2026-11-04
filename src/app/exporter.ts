@@ -1,12 +1,13 @@
 // exporter.ts: turns the code on screen into files and hands them to the user.
 //
 // Web: download, Web Share (phones), clipboard, print.
-// The Android app (Capacitor) gets its own share and save in a later step; the files made
-// here (pngBlob, svgText) stay the same.
+// Android app: Documents/Just QR, the Android share sheet, text copy, no print (native.ts).
+// The files themselves (pngBlob, svgText) are the same everywhere.
 import type {CodeType} from '../lib/payload';
 import type {Matrix} from '../lib/qr';
 import {type CodeStyle, type Logo, logoRect, scaleFor, toPixels, toSvg} from '../lib/render';
 import {logoImage} from './logo-image';
+import {isNative, saveToDocuments, shareFile} from './native';
 
 export interface ExportCode {
     matrix: Matrix;
@@ -19,11 +20,15 @@ export interface ExportCode {
 }
 
 /** "just-qr-wifi-2026-11-04" */
+/**
+ * "just-qr-wifi-2026-11-04-153012": the type, the day and the time to the second, so two codes
+ * saved the same day never share a name (one would replace the other).
+ */
 export function baseName(type: CodeType, date = new Date()): string {
-    const day = [date.getFullYear(), date.getMonth() + 1, date.getDate()].map((n) =>
-        String(n).padStart(2, '0'),
-    );
-    return `just-qr-${type}-${day.join('-')}`;
+    const two = (n: number) => String(n).padStart(2, '0');
+    const day = `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}`;
+    const time = `${two(date.getHours())}${two(date.getMinutes())}${two(date.getSeconds())}`;
+    return `just-qr-${type}-${day}-${time}`;
 }
 
 export function svgText(code: ExportCode): string {
@@ -65,16 +70,32 @@ function download(blob: Blob, name: string) {
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
-export async function savePng(code: ExportCode): Promise<void> {
-    download(await pngBlob(code), `${baseName(code.type)}.png`);
+/** 'android' when the file went to the phone's Documents/Just QR folder, 'download' on the web. */
+export type Saved = 'android' | 'download';
+
+async function save(blob: Blob, name: string): Promise<Saved> {
+    if (isNative()) {
+        await saveToDocuments(name, blob);
+        return 'android';
+    }
+    download(blob, name);
+    return 'download';
 }
 
-export function saveSvg(code: ExportCode): void {
-    download(new Blob([svgText(code)], {type: 'image/svg+xml'}), `${baseName(code.type)}.svg`);
+export async function savePng(code: ExportCode): Promise<Saved> {
+    return save(await pngBlob(code), `${baseName(code.type)}.png`);
 }
+
+export function saveSvg(code: ExportCode): Promise<Saved> {
+    return save(new Blob([svgText(code)], {type: 'image/svg+xml'}), `${baseName(code.type)}.svg`);
+}
+
+/** Printing from inside the Android app is not reliable: Share offers it instead. */
+export const canPrint = (): boolean => !isNative();
 
 /** True when this browser can share an image file (most phones; not most desktops). */
 export function canShareFiles(): boolean {
+    if (isNative()) return true;
     try {
         const probe = new File([new Uint8Array(1)], 'probe.png', {type: 'image/png'});
         return typeof navigator.share === 'function' && !!navigator.canShare?.({files: [probe]});
@@ -85,6 +106,7 @@ export function canShareFiles(): boolean {
 
 /** Opens the phone's share sheet with the PNG. Returns false if the user closed it. */
 export async function share(code: ExportCode): Promise<boolean> {
+    if (isNative()) return shareFile(`${baseName(code.type)}.png`, await pngBlob(code));
     const file = new File([await pngBlob(code)], `${baseName(code.type)}.png`, {type: 'image/png'});
     try {
         await navigator.share({files: [file]});
@@ -97,6 +119,11 @@ export async function share(code: ExportCode): Promise<boolean> {
 
 /** Copies the image. Where images cannot be copied, copies the text inside the code. */
 export async function copy(code: ExportCode): Promise<'image' | 'text'> {
+    // The Android app's web view cannot put images on the clipboard: copy the text inside.
+    if (isNative()) {
+        await navigator.clipboard.writeText(code.payload);
+        return 'text';
+    }
     try {
         if (typeof ClipboardItem === 'undefined') throw new Error('No ClipboardItem');
         await navigator.clipboard.write([new ClipboardItem({'image/png': pngBlob(code)})]);

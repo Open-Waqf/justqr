@@ -1,0 +1,11 @@
+# Phone tests for Just QR Dev, run by `npm run test:android`.
+# Only what a real phone can show: Playwright covers everything else (npm run check).
+# Rules (Signer lesson): select by id only (real HTML ids in the app), no "if visible" steps,
+# so a missing element fails the run instead of being skipped.
+appId: ${APP_ID}
+---
+- runFlow: flows/01-make-and-save.yaml
+- runFlow: flows/02-share-sheet.yaml
+- runFlow: flows/03-history-and-back.yaml
+- runFlow: flows/04-draft-after-app-closed.yaml
+- runFlow: flows/05-arabic.yaml

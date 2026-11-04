@@ -14,7 +14,17 @@ import {
     rememberCode,
     type SavedCode,
 } from '../lib/store';
-import {canShareFiles, copy, type ExportCode, print, savePng, saveSvg, share} from './exporter';
+import {
+    canPrint,
+    canShareFiles,
+    copy,
+    type ExportCode,
+    print,
+    type Saved,
+    savePng,
+    saveSvg,
+    share,
+} from './exporter';
 import './style-panel';
 import {formStyles, LocalizedElement, nextOf, radioStep, typeLabel} from './ui';
 
@@ -36,6 +46,9 @@ const WARNING: Record<LookWarning, MessageKey> = {
     'no-margin': 'warn.no_margin',
     'logo-large': 'warn.logo_large',
 };
+
+const savedMessage = (where: Saved): MessageKey =>
+    where === 'android' ? 'toast.saved_android' : 'toast.saved';
 
 /** Share of the capacity above which the "almost full" hint shows. */
 const ALMOST_FULL = 0.8;
@@ -72,7 +85,7 @@ export class MakePage extends LocalizedElement {
         :host {
             display: block;
             /* Room for the bottom bar. */
-            padding-bottom: calc(96px + env(safe-area-inset-bottom));
+            padding-bottom: calc(96px + var(--inset-bottom));
         }
         .bar {
             position: fixed;
@@ -84,7 +97,7 @@ export class MakePage extends LocalizedElement {
             box-sizing: border-box;
             display: flex;
             gap: 8px;
-            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            padding: 10px 12px calc(10px + var(--inset-bottom));
             background: var(--bg);
             border-top: 1px solid var(--divider);
         }
@@ -379,6 +392,13 @@ export class MakePage extends LocalizedElement {
         clearDraft();
     }
 
+    /** Closes the "more" menu if it is open (Android Back button). Returns true if it was. */
+    closeMenu(): boolean {
+        if (!this.menuOpen) return false;
+        this.menuOpen = false;
+        return true;
+    }
+
     /** Shows a saved code again, ready to edit. Any change is saved as a new code. */
     load(code: SavedCode): void {
         this.restored = false;
@@ -396,6 +416,8 @@ export class MakePage extends LocalizedElement {
         const payload = this.payload;
         if (!payload) return;
         await rememberCode({type: this.type, fields: this.fields[this.type], look: this.look, payload});
+        // History may already be open (a quick tap after Save): tell it to read again.
+        window.dispatchEvent(new CustomEvent('jq-history-changed'));
         if (!this.persisted) {
             this.persisted = true;
             void persist();
@@ -562,27 +584,22 @@ export class MakePage extends LocalizedElement {
             label: MessageKey,
             action: () => Promise<MessageKey | null> | MessageKey | null,
         ) =>
-            html`<button role="menuitem" data-testid=${id} @click=${() => this.run(action)}>${t(label)}</button>`;
+            html`<button role="menuitem" id=${id} data-testid=${id} @click=${() => this.run(action)}>${t(label)}</button>`;
         return html`<div
             class="bar"
             @keydown=${(e: KeyboardEvent) => {
                 if (e.key === 'Escape' && this.menuOpen) {
                     this.menuOpen = false;
-                    this.renderRoot.querySelector<HTMLElement>('[data-testid="btn-more"]')?.focus();
+                    this.renderRoot.querySelector<HTMLElement>('#btn-more')?.focus();
                 }
             }}
         >
-            ${this.toast ? html`<p class="toast" role="status" data-testid="toast">${this.toast}</p>` : nothing}
+            ${this.toast ? html`<p class="toast" role="status" id="toast" data-testid="toast">${this.toast}</p>` : nothing}
             <button
                 class="btn primary"
-                data-testid="btn-save"
+                id="btn-save" data-testid="btn-save"
                 ?disabled=${off}
-                @click=${() =>
-                    code &&
-                    this.run(async () => {
-                        await savePng(code);
-                        return 'toast.saved' as const;
-                    })}
+                @click=${() => code && this.run(async () => savedMessage(await savePng(code)))}
             >
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M6 10l6 6 6-6M4 20h16" /></svg>
                 ${t('action.save')}
@@ -591,7 +608,7 @@ export class MakePage extends LocalizedElement {
                 this.canShare
                     ? html`<button
                           class="btn"
-                          data-testid="btn-share"
+                          id="btn-share" data-testid="btn-share"
                           ?disabled=${off}
                           @click=${() => code && this.run(async () => ((await share(code)) ? null : false))}
                       >
@@ -607,7 +624,7 @@ export class MakePage extends LocalizedElement {
             }
             <button
                 class="btn more"
-                data-testid="btn-more"
+                id="btn-more" data-testid="btn-more"
                 aria-label=${t('action.more')}
                 aria-haspopup="menu"
                 aria-expanded=${this.menuOpen ? 'true' : 'false'}
@@ -630,19 +647,20 @@ export class MakePage extends LocalizedElement {
             ${
                 this.menuOpen && code
                     ? html`<div class="menu" role="menu" data-testid="menu">
-                          ${item('menu-svg', 'action.save_svg', () => {
-                              saveSvg(code);
-                              return 'toast.saved' as const;
-                          })}
+                          ${item('menu-svg', 'action.save_svg', async () => savedMessage(await saveSvg(code)))}
                           ${item('menu-copy', 'action.copy', async () =>
                               (await copy(code)) === 'image'
                                   ? ('toast.copied' as const)
                                   : ('toast.copied_text' as const),
                           )}
-                          ${item('menu-print', 'action.print', () => {
-                              print(code);
-                              return null;
-                          })}
+                          ${
+                              canPrint()
+                                  ? item('menu-print', 'action.print', () => {
+                                        print(code);
+                                        return null;
+                                    })
+                                  : nothing
+                          }
                       </div>`
                     : nothing
             }
@@ -652,7 +670,7 @@ export class MakePage extends LocalizedElement {
     private renderPreview(p: Preview): TemplateResult {
         if (p.kind === 'code') {
             const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(p.svg)}`;
-            return html`<img data-testid="preview-img" src=${src} alt=${t('make.preview_alt')} />`;
+            return html`<img id="preview-img" data-testid="preview-img" src=${src} alt=${t('make.preview_alt')} />`;
         }
         return html`<p class="placeholder">${t('make.empty')}</p>`;
     }
@@ -667,7 +685,7 @@ export class MakePage extends LocalizedElement {
                         html`<button
                             class="chip"
                             role="radio"
-                            data-testid=${`type-${type}`}
+                            id=${`type-${type}`} data-testid=${`type-${type}`}
                             aria-checked=${type === this.type ? 'true' : 'false'}
                             tabindex=${type === this.type ? 0 : -1}
                             @click=${() => {
@@ -680,9 +698,9 @@ export class MakePage extends LocalizedElement {
             </div>
             ${
                 this.restored
-                    ? html`<p class="restored" role="status" data-testid="draft-restored">
+                    ? html`<p class="restored" role="status" id="draft-restored" data-testid="draft-restored">
                           <span>${t('draft.restored')}</span>
-                          <button data-testid="draft-fresh" @click=${this.startFresh}>${t('draft.fresh')}</button>
+                          <button id="draft-fresh" data-testid="draft-fresh" @click=${this.startFresh}>${t('draft.fresh')}</button>
                       </p>`
                     : nothing
             }

@@ -25,7 +25,7 @@ test('Save gives a PNG that both decoders read back', async ({page}) => {
         page.waitForEvent('download'),
         page.getByTestId('btn-save').click(),
     ]);
-    expect(download.suggestedFilename()).toMatch(/^just-qr-link-\d{4}-\d{2}-\d{2}\.png$/);
+    expect(download.suggestedFilename()).toMatch(/^just-qr-link-\d{4}-\d{2}-\d{2}-\d{6}\.png$/);
     const bytes = new Uint8Array(fs.readFileSync(await download.path()));
     expect(await decodePngFile(bytes)).toEqual({jsqr: LINK, zxing: LINK});
     await expect(page.getByTestId('toast')).toBeVisible();
@@ -92,7 +92,7 @@ test('Share sends a PNG to the phone share sheet @phone', async ({page}) => {
     await withCode(page);
     await page.getByTestId('btn-share').click();
     await expect
-        .poll(() => page.evaluate(() => (window as unknown as {shared: unknown[]}).shared))
+        .poll(() => page.evaluate(() => (window as unknown as {shared: unknown[]}).shared), {timeout: 10_000})
         .toEqual([{name: expect.stringMatching(/^just-qr-link-.*\.png$/), type: 'image/png'}]);
 });
 

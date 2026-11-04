@@ -126,6 +126,7 @@ const EN_MESSAGES = {
     'settings.licences_text': 'Just QR is built with these free libraries:',
     'update.ready': 'A new version is ready.',
     'update.apply': 'Update',
+    'toast.saved_android': 'Saved in Documents/Just QR',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;
@@ -242,6 +243,7 @@ const AR_MESSAGES: Messages = {
     'settings.licences_text': 'بُني Just QR بهذه المكتبات المجانية:',
     'update.ready': 'إصدار جديد جاهز.',
     'update.apply': 'تحديث',
+    'toast.saved_android': 'تم الحفظ في Documents/Just QR',
 };
 
 const FR_MESSAGES: Messages = {
@@ -361,6 +363,7 @@ const FR_MESSAGES: Messages = {
     'settings.licences_text': 'Just QR est construit avec ces bibliothèques libres :',
     'update.ready': 'Une nouvelle version est prête.',
     'update.apply': 'Mettre à jour',
+    'toast.saved_android': 'Enregistré dans Documents/Just QR',
 };
 
 const ES_MESSAGES: Messages = {
@@ -480,6 +483,7 @@ const ES_MESSAGES: Messages = {
     'settings.licences_text': 'Just QR está hecho con estas bibliotecas libres:',
     'update.ready': 'Hay una versión nueva lista.',
     'update.apply': 'Actualizar',
+    'toast.saved_android': 'Guardado en Documents/Just QR',
 };
 
 const IT_MESSAGES: Messages = {
@@ -598,6 +602,7 @@ const IT_MESSAGES: Messages = {
     'settings.licences_text': 'Just QR è fatto con queste librerie libere:',
     'update.ready': 'È pronta una nuova versione.',
     'update.apply': 'Aggiorna',
+    'toast.saved_android': 'Salvato in Documents/Just QR',
 };
 
 const MESSAGES: Record<Locale, Messages> = {

@@ -2,6 +2,7 @@ import {css, html, type TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {applyLocale, getLocale, LOCALE_NAMES, LOCALES, type Locale, type MessageKey, t} from '../lib/i18n';
 import {applyTheme, savedTheme, THEMES, type Theme} from '../lib/theme';
+import {matchSystemBars} from './native';
 import {formStyles, LocalizedElement, nextOf, radioStep} from './ui';
 
 const THEME_LABEL: Record<Theme, MessageKey> = {
@@ -67,6 +68,7 @@ export class SettingsPage extends LocalizedElement {
     private setTheme(theme: Theme) {
         this.theme = theme;
         applyTheme(theme, true);
+        matchSystemBars(theme);
     }
 
     private renderThemes(): TemplateResult {
