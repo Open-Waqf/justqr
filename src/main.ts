@@ -1,7 +1,9 @@
 import './app/app-root';
 import {registerSW} from 'virtual:pwa-register';
 import {applyLocale, initialLocale} from './lib/i18n';
+import {applyTheme, savedTheme} from './lib/theme';
 
+applyTheme(savedTheme());
 applyLocale(initialLocale());
 
 // Offline use on the web: the service worker keeps every file of the app. Inside the

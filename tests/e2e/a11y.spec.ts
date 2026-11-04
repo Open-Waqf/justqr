@@ -38,5 +38,9 @@ for (const theme of ['light', 'dark', 'oled'] as const) {
         await page.getByTestId('btn-history').click();
         await page.getByTestId('history-clear').click();
         await expectAccessible(page);
+        // Settings.
+        await page.getByTestId('btn-back').click();
+        await page.getByTestId('btn-settings').click();
+        await expectAccessible(page);
     });
 }

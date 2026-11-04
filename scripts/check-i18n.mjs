@@ -63,7 +63,8 @@ const placeholders = (t) =>
         .join(',');
 // Latin words of 3+ letters in a non-Latin language = probably not translated. Brand and
 // format names that stay in Latin letters everywhere are allowed.
-const KEEP_LATIN = /\b(Just|QR|PNG|SVG|SMS|Wi-Fi|WPA|WPA2|WPA3|WEP|vCard|Android|OLED|px|https?)\b/g;
+const KEEP_LATIN =
+    /\b(Just|QR|Open|Waqf|PNG|SVG|SMS|Wi-Fi|WPA|WPA2|WPA3|WEP|vCard|Android|OLED|px|https?)\b/g;
 const looksUntranslated = (t, en) =>
     t === en && /[A-Za-z]{3,}/.test(t.replace(/\{\{\w+\}\}/g, '').replace(KEEP_LATIN, ''));
 

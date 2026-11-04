@@ -107,6 +107,25 @@ const EN_MESSAGES = {
     'history.unreadable': '{{count}} saved code(s) come from a newer version of the app and cannot be shown.',
     'draft.restored': 'Back where you left off.',
     'draft.fresh': 'Start fresh',
+    'settings.title': 'Settings',
+    'settings.language': 'Language',
+    'settings.theme': 'Theme',
+    'settings.theme_system': 'Phone',
+    'settings.theme_light': 'Light',
+    'settings.theme_dark': 'Dark',
+    'settings.theme_oled': 'OLED black',
+    'settings.privacy': 'Privacy',
+    'settings.privacy_text':
+        'Nothing is collected. No account, no ads, no tracking, no server. Your codes, your logos and your history stay on this device. The codes you make hold your text directly, so nobody can see who scans them.',
+    'settings.about': 'About',
+    'settings.about_text':
+        'Just QR makes plain QR codes that never expire. Free, as a waqf: an Open Waqf app.',
+    'settings.version': 'Version {{version}}',
+    'settings.source': 'Source code',
+    'settings.licences': 'Open-source licences',
+    'settings.licences_text': 'Just QR is built with these free libraries:',
+    'update.ready': 'A new version is ready.',
+    'update.apply': 'Update',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;
@@ -204,6 +223,25 @@ const AR_MESSAGES: Messages = {
     'history.unreadable': '{{count}} من الرموز المحفوظة من إصدار أحدث من التطبيق ولا يمكن عرضها.',
     'draft.restored': 'عدت إلى حيث توقفت.',
     'draft.fresh': 'ابدأ من جديد',
+    'settings.title': 'الإعدادات',
+    'settings.language': 'اللغة',
+    'settings.theme': 'المظهر',
+    'settings.theme_system': 'الهاتف',
+    'settings.theme_light': 'فاتح',
+    'settings.theme_dark': 'داكن',
+    'settings.theme_oled': 'أسود OLED',
+    'settings.privacy': 'الخصوصية',
+    'settings.privacy_text':
+        'لا يُجمع أي شيء. لا حساب، ولا إعلانات، ولا تتبع، ولا خادم. رموزك وشعاراتك وسجلك تبقى على هذا الجهاز. الرموز التي تنشئها تحمل نصك مباشرة، فلا يمكن لأحد أن يعرف من يمسحها.',
+    'settings.about': 'حول التطبيق',
+    'settings.about_text':
+        '‏Just QR ينشئ رموز QR بسيطة لا تنتهي صلاحيتها أبدًا. مجاني، وقفًا: تطبيق من Open Waqf.',
+    'settings.version': 'الإصدار {{version}}',
+    'settings.source': 'الشيفرة المصدرية',
+    'settings.licences': 'تراخيص المصادر المفتوحة',
+    'settings.licences_text': 'بُني Just QR بهذه المكتبات المجانية:',
+    'update.ready': 'إصدار جديد جاهز.',
+    'update.apply': 'تحديث',
 };
 
 const FR_MESSAGES: Messages = {
@@ -304,6 +342,25 @@ const FR_MESSAGES: Messages = {
         '{{count}} code(s) enregistré(s) viennent d’une version plus récente de l’application et ne peuvent pas être affichés.',
     'draft.restored': 'Vous reprenez où vous en étiez.',
     'draft.fresh': 'Repartir à zéro',
+    'settings.title': 'Réglages',
+    'settings.language': 'Langue',
+    'settings.theme': 'Thème',
+    'settings.theme_system': 'Téléphone',
+    'settings.theme_light': 'Clair',
+    'settings.theme_dark': 'Sombre',
+    'settings.theme_oled': 'Noir OLED',
+    'settings.privacy': 'Confidentialité',
+    'settings.privacy_text':
+        'Rien n’est collecté. Pas de compte, pas de pub, pas de suivi, pas de serveur. Vos codes, vos logos et votre historique restent sur cet appareil. Les codes que vous créez contiennent votre texte directement : personne ne peut savoir qui les scanne.',
+    'settings.about': 'À propos',
+    'settings.about_text':
+        'Just QR crée des codes QR simples qui n’expirent jamais. Gratuit, en waqf : une application Open Waqf.',
+    'settings.version': 'Version {{version}}',
+    'settings.source': 'Code source',
+    'settings.licences': 'Licences open source',
+    'settings.licences_text': 'Just QR est construit avec ces bibliothèques libres :',
+    'update.ready': 'Une nouvelle version est prête.',
+    'update.apply': 'Mettre à jour',
 };
 
 const ES_MESSAGES: Messages = {
@@ -404,6 +461,25 @@ const ES_MESSAGES: Messages = {
         '{{count}} código(s) guardado(s) vienen de una versión más reciente de la aplicación y no se pueden mostrar.',
     'draft.restored': 'Sigues donde lo dejaste.',
     'draft.fresh': 'Empezar de cero',
+    'settings.title': 'Ajustes',
+    'settings.language': 'Idioma',
+    'settings.theme': 'Tema',
+    'settings.theme_system': 'Teléfono',
+    'settings.theme_light': 'Claro',
+    'settings.theme_dark': 'Oscuro',
+    'settings.theme_oled': 'Negro OLED',
+    'settings.privacy': 'Privacidad',
+    'settings.privacy_text':
+        'No se recoge nada. Sin cuenta, sin anuncios, sin rastreo, sin servidor. Tus códigos, tus logos y tu historial se quedan en este dispositivo. Los códigos que creas contienen tu texto directamente, así que nadie puede saber quién los escanea.',
+    'settings.about': 'Acerca de',
+    'settings.about_text':
+        'Just QR crea códigos QR sencillos que nunca caducan. Gratis, como waqf: una app de Open Waqf.',
+    'settings.version': 'Versión {{version}}',
+    'settings.source': 'Código fuente',
+    'settings.licences': 'Licencias de código abierto',
+    'settings.licences_text': 'Just QR está hecho con estas bibliotecas libres:',
+    'update.ready': 'Hay una versión nueva lista.',
+    'update.apply': 'Actualizar',
 };
 
 const IT_MESSAGES: Messages = {
@@ -503,6 +579,25 @@ const IT_MESSAGES: Messages = {
         '{{count}} codice/i salvato/i provengono da una versione più recente dell’app e non possono essere mostrati.',
     'draft.restored': 'Riprendi da dove avevi lasciato.',
     'draft.fresh': 'Ricomincia da capo',
+    'settings.title': 'Impostazioni',
+    'settings.language': 'Lingua',
+    'settings.theme': 'Tema',
+    'settings.theme_system': 'Telefono',
+    'settings.theme_light': 'Chiaro',
+    'settings.theme_dark': 'Scuro',
+    'settings.theme_oled': 'Nero OLED',
+    'settings.privacy': 'Privacy',
+    'settings.privacy_text':
+        'Non si raccoglie nulla. Niente account, niente pubblicità, niente tracciamento, niente server. I tuoi codici, i tuoi logo e la tua cronologia restano su questo dispositivo. I codici che crei contengono direttamente il tuo testo, quindi nessuno può sapere chi li scansiona.',
+    'settings.about': 'Informazioni',
+    'settings.about_text':
+        'Just QR crea codici QR semplici che non scadono mai. Gratis, come waqf: un’app Open Waqf.',
+    'settings.version': 'Versione {{version}}',
+    'settings.source': 'Codice sorgente',
+    'settings.licences': 'Licenze open source',
+    'settings.licences_text': 'Just QR è fatto con queste librerie libere:',
+    'update.ready': 'È pronta una nuova versione.',
+    'update.apply': 'Aggiorna',
 };
 
 const MESSAGES: Record<Locale, Messages> = {
