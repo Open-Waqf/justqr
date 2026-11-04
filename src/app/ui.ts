@@ -83,10 +83,22 @@ export const formStyles = css`
         font: inherit;
         font-size: 16px;
     }
+    /* A field you type in shows focus on its own border. Browsers count every tap on a
+       text field as "focus-visible", so an outline ring there drew a second box around
+       the field on phones. */
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    /* Buttons and the like: a ring only for keyboard users. */
     button:focus-visible,
-    input:focus-visible,
-    select:focus-visible,
-    textarea:focus-visible,
+    input[type='color']:focus-visible,
+    input[type='file']:focus-visible,
+    input[type='checkbox']:focus-visible,
+    input[type='range']:focus-visible,
     summary:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: 2px;

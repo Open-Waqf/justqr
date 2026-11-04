@@ -118,3 +118,38 @@ test('Contact shows the common fields, the rest on request, and the code stays o
     await page.getByTestId('type-contact').click();
     await expect(page.getByTestId('f-org')).toHaveValue('Open Waqf');
 });
+
+test('tapping a field or a button draws no extra box; the keyboard still gets a ring @phone', async ({
+    page,
+}) => {
+    await openApp(page);
+    const outline = (id: string) =>
+        page.getByTestId(id).evaluate((el) => {
+            const s = getComputedStyle(el);
+            return {style: s.outlineStyle, border: s.borderColor};
+        });
+    const accent = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        probe.style.color = 'var(--accent)';
+        document.body.append(probe);
+        const c = getComputedStyle(probe).color;
+        probe.remove();
+        return c;
+    });
+    // A tapped text field shows focus on its own border, with no ring around it.
+    await page.getByTestId('f-url').tap();
+    expect(await outline('f-url')).toEqual({style: 'none', border: accent});
+    // A tapped button: nothing.
+    await page.getByTestId('type-text').tap();
+    expect((await outline('type-text')).style).toBe('none');
+    await page.getByTestId('type-link').tap();
+    // The keyboard: a ring, so keyboard users see where they are.
+    await page.getByTestId('f-url').focus();
+    await page.keyboard.press('Shift+Tab');
+    const ring = await page.evaluate(() => {
+        let el: Element | null = document.activeElement;
+        while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+        return el ? getComputedStyle(el).outlineStyle : null;
+    });
+    expect(ring).toBe('solid');
+});
