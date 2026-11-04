@@ -139,6 +139,11 @@ test('tapping a field or a button draws no extra box; the keyboard still gets a 
     // A tapped text field shows focus on its own border, with no ring around it.
     await page.getByTestId('f-url').tap();
     expect(await outline('f-url')).toEqual({style: 'none', border: accent});
+    // No square tap flash from Android over anything (it inherits into every screen).
+    const flash = await page
+        .getByTestId('type-text')
+        .evaluate((el) => getComputedStyle(el).getPropertyValue('-webkit-tap-highlight-color'));
+    expect(flash).toBe('rgba(0, 0, 0, 0)');
     // A tapped button: nothing.
     await page.getByTestId('type-text').tap();
     expect((await outline('type-text')).style).toBe('none');

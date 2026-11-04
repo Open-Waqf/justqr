@@ -74,6 +74,12 @@
     --inset-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
 }
 
+html {
+    /* Android draws a square box over anything tapped (green-tinted on our colours). The app
+       shows its own state instead: a chosen type turns green, fields get a green border. */
+    -webkit-tap-highlight-color: transparent;
+}
+
 html,
 body {
     margin: 0;
