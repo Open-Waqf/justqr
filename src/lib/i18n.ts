@@ -93,6 +93,7 @@ const EN_MESSAGES = {
     'style.ec_logo': 'With a logo, H is always used, so the code still scans.',
     'warn.logo_large': 'The logo is large. Some phones may not scan this code. Try a smaller logo.',
     'toast.logo_failed': 'This picture could not be opened. Try another one.',
+    'field.more': 'More fields',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;
@@ -176,6 +177,7 @@ const AR_MESSAGES: Messages = {
     'style.ec_logo': 'مع الشعار يُستخدم المستوى H دائمًا، ليبقى الرمز قابلًا للمسح.',
     'warn.logo_large': 'الشعار كبير. قد لا تتمكن بعض الهواتف من مسح هذا الرمز. جرّب شعارًا أصغر.',
     'toast.logo_failed': 'تعذّر فتح هذه الصورة. جرّب صورة أخرى.',
+    'field.more': 'حقول أخرى',
 };
 
 const FR_MESSAGES: Messages = {
@@ -260,6 +262,7 @@ const FR_MESSAGES: Messages = {
     'warn.logo_large':
         'Le logo est grand. Certains téléphones risquent de ne pas scanner ce code. Essayez un logo plus petit.',
     'toast.logo_failed': 'Impossible d’ouvrir cette image. Essayez-en une autre.',
+    'field.more': 'Plus de champs',
 };
 
 const ES_MESSAGES: Messages = {
@@ -344,6 +347,7 @@ const ES_MESSAGES: Messages = {
     'warn.logo_large':
         'El logo es grande. Algunos teléfonos quizá no escaneen este código. Prueba con un logo más pequeño.',
     'toast.logo_failed': 'No se ha podido abrir esta imagen. Prueba con otra.',
+    'field.more': 'Más campos',
 };
 
 const IT_MESSAGES: Messages = {
@@ -428,6 +432,7 @@ const IT_MESSAGES: Messages = {
     'warn.logo_large':
         'Il logo è grande. Alcuni telefoni potrebbero non leggere questo codice. Prova un logo più piccolo.',
     'toast.logo_failed': 'Impossibile aprire questa immagine. Prova con un’altra.',
+    'field.more': 'Altri campi',
 };
 
 const MESSAGES: Record<Locale, Messages> = {

@@ -99,3 +99,22 @@ test('Arabic text in a code reads back exactly @rtl', async ({page}) => {
     await page.getByTestId('f-text').fill('بسم الله الرحمن الرحيم');
     expect(await readCode(preview(page))).toBe('بسم الله الرحمن الرحيم');
 });
+
+test('Contact shows the common fields, the rest on request, and the code stays on screen', async ({page}) => {
+    await openApp(page);
+    await page.getByTestId('type-contact').click();
+    await expect(page.getByTestId('f-org')).toHaveCount(0);
+    await page.getByTestId('f-firstName').fill('Ahmed');
+    // The top of the code is on screen without scrolling.
+    const box = await page.getByTestId('preview').boundingBox();
+    const height = page.viewportSize()!.height;
+    expect(box!.y + box!.height / 3, 'code below the screen').toBeLessThan(height);
+    await page.getByTestId('contact-more').click();
+    await expect(page.getByTestId('f-org')).toBeFocused();
+    await page.getByTestId('f-org').fill('Open Waqf');
+    expect(await readCode(preview(page))).toContain('ORG:Open Waqf');
+    // Coming back later, a filled field is never hidden.
+    await page.getByTestId('type-link').click();
+    await page.getByTestId('type-contact').click();
+    await expect(page.getByTestId('f-org')).toHaveValue('Open Waqf');
+});

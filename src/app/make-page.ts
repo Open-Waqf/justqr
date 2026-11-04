@@ -198,6 +198,18 @@ export class MakePage extends LocalizedElement {
             min-height: 96px;
             resize: vertical;
         }
+        .more-fields {
+            margin-top: 10px;
+            min-height: 44px;
+            padding: 0 4px;
+            border: 0;
+            background: none;
+            color: var(--accent);
+            font: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
         .row2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -258,6 +270,8 @@ export class MakePage extends LocalizedElement {
         CODE_TYPES.map((k) => [k, emptyFields(k)]),
     ) as AllFields;
     @state() private look: Look = DEFAULT_LOOK;
+    /** Contact shows its rarely used fields only on request, so the code stays on screen. */
+    @state() private moreContact = false;
     @state() private menuOpen = false;
     @state() private toast = '';
     private toastTimer = 0;
@@ -317,6 +331,25 @@ export class MakePage extends LocalizedElement {
             }`;
     }
 
+    private renderMoreContact(): TemplateResult {
+        const f = this.fields.contact;
+        // Always open when one of them holds something, so nothing in the code is hidden.
+        if (this.moreContact || f.org || f.title || f.url) {
+            return html`${this.input('contact', 'org', 'field.org')} ${this.input('contact', 'title', 'field.job_title')}
+            ${this.input('contact', 'url', 'field.website', {kind: 'url', ltr: true})}`;
+        }
+        return html`<button
+            class="more-fields"
+            data-testid="contact-more"
+            @click=${() => {
+                this.moreContact = true;
+                this.updateComplete.then(() => this.renderRoot.querySelector<HTMLElement>('#f-org')?.focus());
+            }}
+        >
+            ${t('field.more')}
+        </button>`;
+    }
+
     private renderFields(): TemplateResult {
         switch (this.type) {
             case 'link':
@@ -358,8 +391,7 @@ export class MakePage extends LocalizedElement {
                     </div>
                     ${this.input('contact', 'phone', 'field.phone', {kind: 'tel', ltr: true})}
                     ${this.input('contact', 'email', 'field.email', {kind: 'email', ltr: true})}
-                    ${this.input('contact', 'org', 'field.org')} ${this.input('contact', 'title', 'field.job_title')}
-                    ${this.input('contact', 'url', 'field.website', {kind: 'url', ltr: true})}`;
+                    ${this.renderMoreContact()}`;
             case 'phone':
                 return this.input('phone', 'number', 'field.number', {kind: 'tel', ltr: true});
             case 'sms':
