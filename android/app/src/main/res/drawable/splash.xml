@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launch screen: the Just QR icon on the app's background colour (white, or the dark
+     theme's colour when the phone is in dark mode: values-night/splash.xml). It replaced
+     Capacitor's template images, which showed Capacitor's own logo. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item android:width="128dp" android:height="128dp" android:gravity="center"
+        android:drawable="@drawable/splash_logo" />
+</layer-list>
