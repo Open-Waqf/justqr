@@ -1,6 +1,6 @@
 import {css, html, LitElement} from 'lit';
 import {customElement} from 'lit/decorators.js';
-import {t} from '../lib/i18n';
+import './make-page';
 
 @customElement('jq-app')
 export class AppRoot extends LitElement {
@@ -26,25 +26,7 @@ export class AppRoot extends LitElement {
             flex: 1;
             padding: 0 16px 16px;
         }
-        .honest {
-            color: var(--muted);
-            font-size: 14px;
-            line-height: 1.45;
-            text-align: center;
-        }
     `;
-
-    private onLocale = () => this.requestUpdate();
-
-    connectedCallback(): void {
-        super.connectedCallback();
-        window.addEventListener('jq-locale', this.onLocale);
-    }
-
-    disconnectedCallback(): void {
-        window.removeEventListener('jq-locale', this.onLocale);
-        super.disconnectedCallback();
-    }
 
     firstUpdated(): void {
         // The startup test reads this mark (tests/e2e/startup.spec.ts).
@@ -57,7 +39,7 @@ export class AppRoot extends LitElement {
                 <h1>Just QR</h1>
             </header>
             <main data-testid="app">
-                <p class="honest" data-testid="honest-line">${t('make.honest')}</p>
+                <jq-make></jq-make>
             </main>
         `;
     }

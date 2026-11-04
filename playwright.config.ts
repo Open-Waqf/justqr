@@ -24,8 +24,8 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 1 : 0,
     // At most 4 browsers at once locally, fewer when memory is short (each needs about
-    // 600 MB; with work services running, 4 browsers crashed with "Target crashed"). Two on CI.
-    workers: process.env.CI ? 2 : Math.max(1, Math.min(4, Math.floor(os.freemem() / (600 * 1024 * 1024)))),
+    // 1 GB with axe; with work services running, 4 browsers crashed with "Target crashed"). Two on CI.
+    workers: process.env.CI ? 2 : Math.max(1, Math.min(4, Math.floor(os.freemem() / (1024 * 1024 * 1024)))),
     // The HTML report is written but never opens by itself (it would block `npm run check`).
     reporter: [['list'], ['html', {open: 'never'}]],
     use: {

@@ -6,5 +6,9 @@ for (const theme of ['light', 'dark', 'oled'] as const) {
         await openApp(page);
         await setTheme(page, theme);
         await expectAccessible(page);
+        // With a code and the Wi-Fi form on screen too.
+        await page.getByTestId('type-wifi').click();
+        await page.getByTestId('f-ssid').fill('Home');
+        await expectAccessible(page);
     });
 }
