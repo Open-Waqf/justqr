@@ -19,8 +19,17 @@ import {fileURLToPath} from 'node:url';
 import {unzipSync} from 'fflate';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// The release APK is signed (app-release.apk) when android/keystore.properties exists, as on
+// your computer, and unsigned (app-release-unsigned.apk) without it, as on GitHub. Check the
+// newest one, so an old file left from the other kind of build is never checked by mistake.
+const RELEASE_DIR = path.join(ROOT, 'android/app/build/outputs/apk/release');
 const APK =
-    process.argv[2] || path.join(ROOT, 'android/app/build/outputs/apk/release/app-release-unsigned.apk');
+    process.argv[2] ||
+    ['app-release.apk', 'app-release-unsigned.apk']
+        .map((f) => path.join(RELEASE_DIR, f))
+        .filter((f) => fs.existsSync(f))
+        .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0] ||
+    path.join(RELEASE_DIR, 'app-release-unsigned.apk');
 const APP_ID = 'org.openwaqf.justqr';
 // AndroidX core adds this signature-level permission so the app's own broadcast receivers stay
 // private. It gives no access to anything.
