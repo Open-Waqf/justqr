@@ -40,7 +40,7 @@ rule), then delete that test. Done for the network guard and axe on 2026-11-04.
 - `maestro/android/` flows run on the real phone (`npm run test:android`): save (the script then
   checks a new PNG is in `Documents/Just QR`), the real share sheet, History and Back, the
   draft after Android closes the app, Arabic. Select by HTML `id` only, no "if visible" steps.
-- `npm run check:android` reads the release APK: no permissions, no trackers.
+- `npm run check:android` reads the release APK: no INTERNET, storage permissions only up to Android 10 (maxSdkVersion 29), no trackers.
 
 Found on the phone, not in the browser (Nov 2026): the app drew under the status bar (Android
 draws edge to edge; Capacitor gives the bar heights as `--safe-area-inset-*`), and two saves the

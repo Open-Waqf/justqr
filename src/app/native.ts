@@ -1,6 +1,7 @@
 // native.ts: the Android app's own behaviour. On the web none of this runs.
 //
-// - Save writes into the phone's Documents/Just QR folder (no permission needed on Android 11+).
+// - Save writes into the phone's Documents/Just QR folder. Android 11+ asks for no permission;
+//   Android 10 and older ask once for storage access.
 // - Share opens the Android share sheet with the PNG.
 // - The Back button closes the open menu or screen, then leaves the app.
 // - The system bar icons follow the app's theme, so they stay visible.
@@ -29,6 +30,14 @@ export function numbered(name: string, n: number): string {
     return dot > 0 ? `${name.slice(0, dot)}-${n}${name.slice(dot)}` : `${name}-${n}`;
 }
 
+/** The user said no to storage access (Android 10 and older). */
+export class StorageDeniedError extends Error {
+    constructor() {
+        super('Storage access denied');
+        this.name = 'StorageDeniedError';
+    }
+}
+
 /**
  * Writes the file to Documents/Just QR/<name>, never over another file. Returns the path.
  * A file with the same name can exist (saved in the same second, or left by an earlier
@@ -36,6 +45,10 @@ export function numbered(name: string, n: number): string {
  * free name is used: code-2.png, code-3.png...
  */
 export async function saveToDocuments(name: string, blob: Blob): Promise<string> {
+    // Asks once on Android 10 and older; answers "granted" at once on newer phones. Without
+    // this, every write below would ask again.
+    const {publicStorage} = await Filesystem.requestPermissions();
+    if (publicStorage !== 'granted') throw new StorageDeniedError();
     const data = await base64(blob);
     let lastError: unknown;
     for (let n = 1; n <= 20; n++) {

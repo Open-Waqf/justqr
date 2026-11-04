@@ -23,6 +23,8 @@ export type FakeAndroidOptions = {
      * (stat fails) and cannot replace them (write fails). Paths like "Just QR/x.png".
      */
     foreignFiles?: string[];
+    /** Android 10 and older: the user says no to storage access. */
+    denyStorage?: boolean;
 };
 
 // Every native method the app calls, per plugin. A method missing here would make Capacitor
@@ -36,6 +38,8 @@ const METHODS: Record<string, string[]> = {
         'readFile',
         'stat',
         'mkdir',
+        'checkPermissions',
+        'requestPermissions',
         'addListener',
         'removeListener',
     ],
@@ -74,6 +78,9 @@ export async function fakeAndroid(page: Page, options: FakeAndroidOptions = {}) 
                         if (!(uri in files)) throw new Error('File does not exist');
                         return {type: 'file', size: files[uri].length, uri};
                     }
+                    case 'Filesystem.requestPermissions':
+                    case 'Filesystem.checkPermissions':
+                        return {publicStorage: options.denyStorage ? 'denied' : 'granted'};
                     case 'Filesystem.getUri':
                         return {uri: (ROOTS[o.directory] ?? 'file:///') + o.path};
                     case 'Share.share':

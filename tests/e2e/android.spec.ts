@@ -64,6 +64,19 @@ test('a full phone shows a clear failure', async ({page}) => {
     await expect(page.getByTestId('toast')).toContainText('did not work');
 });
 
+test('Android 10 and older: saying no to storage access explains what to do, and asks only once', async ({
+    page,
+}) => {
+    await fakeAndroid(page, {denyStorage: true});
+    await withCode(page);
+    await page.getByTestId('btn-save').click();
+    await expect(page.getByTestId('toast')).toContainText('allow storage access');
+    const fs = await nativeCalls(page, 'Filesystem');
+    expect(fs.map((c) => c.method)).toEqual(['requestPermissions']);
+    await page.getByTestId('btn-history').click();
+    await expect(page.getByTestId('history-empty')).toBeVisible();
+});
+
 test('Copy copies the text, and there is no Print in the app', async ({page, context}) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await fakeAndroid(page);

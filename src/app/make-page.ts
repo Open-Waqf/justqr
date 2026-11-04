@@ -25,6 +25,7 @@ import {
     saveSvg,
     share,
 } from './exporter';
+import {StorageDeniedError} from './native';
 import './style-panel';
 import {formStyles, LocalizedElement, nextOf, radioStep, typeLabel} from './ui';
 
@@ -572,8 +573,8 @@ export class MakePage extends LocalizedElement {
             if (done === false) return; // the user backed out (closed the share sheet)
             await this.remember();
             if (done) this.say(done);
-        } catch {
-            this.say('toast.failed');
+        } catch (e) {
+            this.say(e instanceof StorageDeniedError ? 'toast.save_denied' : 'toast.failed');
         }
     }
 

@@ -47,8 +47,10 @@ On Ubuntu 26.04, Playwright needs `PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04
 
 ## Android app
 
-Capacitor 8, Android 11 or newer. The Play Store app asks for no permissions at all (no
-INTERNET), and its data is never backed up to the cloud.
+Capacitor 8, Android 7 or newer. The Play Store app never has INTERNET, and its data is never
+backed up to the cloud. On Android 11 and newer it asks for no permission at all; on Android 10
+and older, Save asks once for storage access (to write into Documents/Just QR). A phone whose
+WebView is older than Chrome 111 sees a short "please update Android System WebView" page.
 
 Phone setup, once: Settings, About phone, tap "Build number" 7 times; then Developer options,
 turn on "USB debugging". Plug the phone in and accept the prompt.
@@ -59,7 +61,7 @@ turn on "USB debugging". Plug the phone in and accept the prompt.
 | `npm run android:live`  | Same, and the phone reloads on every file change (the dev build has INTERNET for this only)                                       |
 | `npm run test:android`  | Install Just QR Dev and run the Maestro flows in `maestro/android/` (keep the phone unlocked)                                     |
 | `npm run android:build` | Build the debug and release apps (`android/app/build/outputs/apk/`)                                                               |
-| `npm run check:android` | Check the release app: no permissions, no trackers. GitHub runs it on every push                                                  |
+| `npm run check:android` | Check the release app: no INTERNET, storage only up to Android 10, no trackers. GitHub runs it on every push                      |
 | `npm run icons`         | Redraw the web and Android icon sources; then `npx @capacitor/assets generate --android`                                          |
 
 Saved codes go to the phone's `Documents/Just QR` folder.

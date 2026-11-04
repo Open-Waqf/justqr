@@ -6,8 +6,9 @@
  *   node scripts/check-android.mjs path/to/app.apk
  *
  * Checks the release APK (unsigned is fine: the code is the same):
- *   1. permissions: none, except the one AndroidX adds for itself. In particular no INTERNET,
- *      so the app could not send anything even if a library tried.
+ *   1. permissions: none on Android 11+, except the one AndroidX adds for itself. Storage
+ *      access only up to Android 10 (to save into Documents). Never INTERNET, so the app
+ *      could not send anything even if a library tried.
  *   2. trackers: no analytics or crash-reporting library inside (scan from Lens).
  * GitHub runs it on every push (.github/workflows/ci.yml, job "android").
  */
@@ -24,6 +25,12 @@ const APP_ID = 'org.openwaqf.justqr';
 // AndroidX core adds this signature-level permission so the app's own broadcast receivers stay
 // private. It gives no access to anything.
 const ALLOWED = new Set([`${APP_ID}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`]);
+// Android 10 and older need storage access to save into Documents. Allowed only with
+// maxSdkVersion 29 or lower, so Android 11 and newer never see them.
+const OLD_PHONES_ONLY = new Set([
+    'android.permission.READ_EXTERNAL_STORAGE',
+    'android.permission.WRITE_EXTERNAL_STORAGE',
+]);
 
 /** @type {[string, string[]][]} */
 const TRACKERS = [
@@ -66,9 +73,16 @@ if (!tool) {
 } else {
     const r = spawnSync(tool, ['dump', 'permissions', APK], {encoding: 'utf8'});
     if (r.status !== 0) problems.push(`aapt2 failed: ${r.stderr}`);
-    const used = [...(r.stdout || '').matchAll(/uses-permission: name='([^']+)'/g)].map((m) => m[1]);
-    for (const p of used)
-        if (!ALLOWED.has(p)) problems.push(`permission ${p} (the store build must ask for none)`);
+    const used = [
+        ...(r.stdout || '').matchAll(/uses-permission: name='([^']+)'(?: maxSdkVersion='(\d+)')?/g),
+    ];
+    for (const [, p, max] of used) {
+        if (ALLOWED.has(p)) continue;
+        if (OLD_PHONES_ONLY.has(p) && max && Number(max) <= 29) continue;
+        problems.push(
+            `permission ${p}${max ? ` (maxSdkVersion ${max})` : ''}: not allowed in the store build`,
+        );
+    }
     const pkg = /^package: (\S+)/m.exec(r.stdout || '')?.[1];
     if (pkg !== APP_ID) problems.push(`package is ${pkg}, expected ${APP_ID} (is this the release build?)`);
 }
@@ -87,5 +101,5 @@ if (problems.length) {
     process.exit(1);
 }
 console.log(
-    `✓ ${path.basename(APK)}: no permissions (no INTERNET), no trackers in ${Object.keys(files).length} code file(s).`,
+    `✓ ${path.basename(APK)}: no INTERNET, storage only up to Android 10, no trackers in ${Object.keys(files).length} code file(s).`,
 );
