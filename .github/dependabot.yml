@@ -31,6 +31,14 @@ updates:
       groups:
           gradle:
               patterns: ["*"]
+      ignore:
+          # Gradle 9 fails with the Android Gradle plugin 8.x that Capacitor 8 uses (tried
+          # 2026-11-04: "Failed to apply plugin com.android.internal.application"). Move to
+          # Gradle 9 together with Capacitor, when its Android template does.
+          - dependency-name: gradle-wrapper
+            update-types: ["version-update:semver-major"]
+          - dependency-name: com.android.tools.build:gradle
+            update-types: ["version-update:semver-major"]
 
     - package-ecosystem: github-actions
       directory: "/"
