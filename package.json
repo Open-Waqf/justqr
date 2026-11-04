@@ -24,7 +24,9 @@
     "android:live": "node scripts/run-android.mjs --live",
     "test:android": "node scripts/test-android.mjs",
     "android:build": "npm run build && npx cap sync android && cd android && ./gradlew --no-daemon -q assembleDebug assembleRelease",
-    "check:android": "node scripts/check-android.mjs"
+    "check:android": "node scripts/check-android.mjs",
+    "android:release": "node scripts/release-android.mjs",
+    "release": "node scripts/release.mjs"
   },
   "engines": {
     "node": ">=22"

@@ -66,6 +66,21 @@ turn on "USB debugging". Plug the phone in and accept the prompt.
 
 Saved codes go to the phone's `Documents/Just QR` folder.
 
+## Release
+
+Unlock the Cryptomator vault first (the Android upload key lives there).
+
+```
+npm run release -- --dry-run    # see what would happen, change nothing
+npm run release                 # next version (0.1.0 -> 0.2.0); the first release keeps 0.1.0
+npm run release -- 1.0.0        # an exact version
+```
+
+It runs every check, sets the version, commits "Release X", tags vX and pushes. The tag
+makes GitHub test again and deploy qr.open-waqf.org. Then it builds the signed bundle for
+Google Play (`npm run android:release`, also on its own) and checks the upload key and that
+the store app has no INTERNET. Upload the `.aab` it prints in Play Console yourself.
+
 More: [docs/TESTING.md](docs/TESTING.md), [docs/TRANSLATIONS.md](docs/TRANSLATIONS.md).
 
 ## Licence
