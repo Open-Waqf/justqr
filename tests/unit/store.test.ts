@@ -2,16 +2,21 @@ import 'fake-indexeddb/auto';
 import {IDBFactory} from 'fake-indexeddb';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {DEFAULT_LOOK} from '../../src/lib/look';
+import {CODE_TYPES, emptyFields} from '../../src/lib/payload';
 import {
     clearCodes,
+    clearDraft,
     closeStore,
     DB_NAME,
     DB_VERSION,
     deleteCode,
     getCode,
+    getDraft,
     listCodes,
+    parseDraft,
     parseRecord,
     putCode,
+    putDraft,
     rememberCode,
     type SavedCode,
     sameCode,
@@ -45,9 +50,15 @@ async function putRaw(value: unknown) {
 }
 
 beforeEach(async () => {
-    // A fresh, empty database for every test. The store module reopens it lazily.
+    // A fresh, empty database and storage for every test. The store module reopens it lazily.
     await closeStore();
     (globalThis as {indexedDB: IDBFactory}).indexedDB = new IDBFactory();
+    const map = new Map<string, string>();
+    (globalThis as {localStorage: unknown}).localStorage = {
+        getItem: (k: string) => map.get(k) ?? null,
+        setItem: (k: string, v: string) => void map.set(k, String(v)),
+        removeItem: (k: string) => void map.delete(k),
+    };
 });
 
 describe('parseRecord', () => {
@@ -171,5 +182,39 @@ describe('store', () => {
             ),
         ).toBe(false);
         expect(sameCode(base, {payload: 'x', look: {...DEFAULT_LOOK, logo}})).toBe(false);
+    });
+});
+
+describe('draft', () => {
+    const fields = Object.fromEntries(CODE_TYPES.map((t) => [t, emptyFields(t)])) as never;
+    const draft = {schema: 1 as const, savedAt: 5, type: 'wifi' as const, fields, look: DEFAULT_LOOK};
+
+    it('is empty at first, then comes back as written, and can be cleared', () => {
+        expect(getDraft()).toBeNull();
+        putDraft(draft);
+        expect(getDraft()).toEqual(draft);
+        putDraft({...draft, savedAt: 6});
+        expect(getDraft()?.savedAt).toBe(6);
+        clearDraft();
+        expect(getDraft()).toBeNull();
+    });
+
+    it('a broken or blocked storage gives no draft, without throwing', () => {
+        localStorage.setItem('justqr.draft', '{not json');
+        expect(getDraft()).toBeNull();
+        (globalThis as {localStorage: unknown}).localStorage = {
+            getItem: () => {
+                throw new Error('blocked');
+            },
+        };
+        expect(getDraft()).toBeNull();
+    });
+
+    it('a draft the app cannot read is ignored, never thrown', () => {
+        expect(parseDraft(draft)).toEqual(draft);
+        expect(parseDraft({...draft, schema: 2})).toBeNull();
+        expect(parseDraft({...draft, type: 'x'})).toBeNull();
+        expect(parseDraft({...draft, fields: {link: {url: ''}}})).toBeNull();
+        expect(parseDraft({...draft, look: {...DEFAULT_LOOK, fg: 'red'}})).toBeNull();
     });
 });

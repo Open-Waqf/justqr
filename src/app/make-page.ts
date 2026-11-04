@@ -5,7 +5,15 @@ import {DEFAULT_LOOK, effectiveEc, type Look, type LookWarning, lookWarnings} fr
 import {buildPayload, CODE_TYPES, type CodeType, emptyFields, type FieldsByType} from '../lib/payload';
 import {byteLength, MAX_BYTES, type Matrix, makeMatrix, TooLongError} from '../lib/qr';
 import {toSvg} from '../lib/render';
-import {persist, rememberCode, type SavedCode} from '../lib/store';
+import {
+    clearDraft,
+    type Draft,
+    getDraft,
+    persist,
+    putDraft,
+    rememberCode,
+    type SavedCode,
+} from '../lib/store';
 import {canShareFiles, copy, type ExportCode, print, savePng, saveSvg, share} from './exporter';
 import './style-panel';
 import {formStyles, LocalizedElement, nextOf, radioStep, typeLabel} from './ui';
@@ -189,6 +197,30 @@ export class MakePage extends LocalizedElement {
             min-height: 96px;
             resize: vertical;
         }
+        .restored {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 4px 0 8px;
+            padding: 6px 6px 6px 12px;
+            border-radius: 10px;
+            background: var(--surface);
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .restored button {
+            min-height: 36px;
+            padding: 0 12px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--accent);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
         .more-fields {
             margin-top: 10px;
             min-height: 44px;
@@ -276,18 +308,80 @@ export class MakePage extends LocalizedElement {
         }
     };
 
+    /** Shows "Back where you left off" after a draft came back. */
+    @state() private restored = false;
+    private draftTimer = 0;
+    private draftReady = false;
+    // The phone may kill a background app any moment: write the draft at once when the app
+    // goes to the background (visibilitychange) or the page is left (pagehide: reload, close).
+    private onHidden = () => {
+        if (document.visibilityState === 'hidden') this.saveDraft();
+    };
+    private onLeave = () => this.saveDraft();
+
     connectedCallback(): void {
         super.connectedCallback();
         document.addEventListener('pointerdown', this.onOutside);
+        document.addEventListener('visibilitychange', this.onHidden);
+        window.addEventListener('pagehide', this.onLeave);
+        this.restoreDraft();
     }
 
     disconnectedCallback(): void {
         document.removeEventListener('pointerdown', this.onOutside);
+        document.removeEventListener('visibilitychange', this.onHidden);
+        window.removeEventListener('pagehide', this.onLeave);
         super.disconnectedCallback();
+    }
+
+    protected updated(changed: Map<PropertyKey, unknown>): void {
+        // Anything the user typed or styled is written to the draft a moment later, so even a
+        // crash loses almost nothing. Not before the saved draft was read back.
+        if (this.draftReady && (changed.has('type') || changed.has('fields') || changed.has('look'))) {
+            clearTimeout(this.draftTimer);
+            this.draftTimer = window.setTimeout(() => this.saveDraft(), 800);
+        }
+    }
+
+    private draft(): Draft {
+        return {schema: 1, savedAt: Date.now(), type: this.type, fields: this.fields, look: this.look};
+    }
+
+    private saveDraft(): void {
+        if (!this.draftReady) return;
+        clearTimeout(this.draftTimer);
+        try {
+            putDraft(this.draft());
+        } catch {
+            // Storage blocked or full; typing still works.
+        }
+    }
+
+    private restoreDraft(): void {
+        const draft = getDraft();
+        if (draft && buildPayload(draft.type, draft.fields[draft.type] as never)) {
+            this.type = draft.type;
+            this.fields = {...this.fields, ...draft.fields};
+            this.look = draft.look;
+            this.restored = true;
+        }
+        this.draftReady = true;
+    }
+
+    /** "Start fresh": forgets the draft and empties every field. */
+    private startFresh(): void {
+        this.restored = false;
+        this.type = 'link';
+        this.fields = Object.fromEntries(CODE_TYPES.map((k) => [k, emptyFields(k)])) as AllFields;
+        this.look = DEFAULT_LOOK;
+        this.moreContact = false;
+        clearTimeout(this.draftTimer);
+        clearDraft();
     }
 
     /** Shows a saved code again, ready to edit. Any change is saved as a new code. */
     load(code: SavedCode): void {
+        this.restored = false;
         this.type = code.type;
         this.fields = {...this.fields, [code.type]: {...code.fields}};
         this.look = code.look;
@@ -584,6 +678,14 @@ export class MakePage extends LocalizedElement {
                         </button>`,
                 )}
             </div>
+            ${
+                this.restored
+                    ? html`<p class="restored" role="status" data-testid="draft-restored">
+                          <span>${t('draft.restored')}</span>
+                          <button data-testid="draft-fresh" @click=${this.startFresh}>${t('draft.fresh')}</button>
+                      </p>`
+                    : nothing
+            }
             <div data-testid="fields">${this.renderFields()}</div>
             <div class="preview" data-testid="preview">${this.renderPreview(p)}</div>
             ${p.kind === 'too-long' ? html`<p class="notice" role="alert" data-testid="too-long">${t('make.too_long')}</p>` : nothing}

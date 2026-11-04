@@ -105,6 +105,8 @@ const EN_MESSAGES = {
     'history.clear_yes': 'Delete all',
     'history.cancel': 'Cancel',
     'history.unreadable': '{{count}} saved code(s) come from a newer version of the app and cannot be shown.',
+    'draft.restored': 'Back where you left off.',
+    'draft.fresh': 'Start fresh',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;
@@ -200,6 +202,8 @@ const AR_MESSAGES: Messages = {
     'history.clear_yes': 'حذف الكل',
     'history.cancel': 'إلغاء',
     'history.unreadable': '{{count}} من الرموز المحفوظة من إصدار أحدث من التطبيق ولا يمكن عرضها.',
+    'draft.restored': 'عدت إلى حيث توقفت.',
+    'draft.fresh': 'ابدأ من جديد',
 };
 
 const FR_MESSAGES: Messages = {
@@ -298,6 +302,8 @@ const FR_MESSAGES: Messages = {
     'history.cancel': 'Annuler',
     'history.unreadable':
         '{{count}} code(s) enregistré(s) viennent d’une version plus récente de l’application et ne peuvent pas être affichés.',
+    'draft.restored': 'Vous reprenez où vous en étiez.',
+    'draft.fresh': 'Repartir à zéro',
 };
 
 const ES_MESSAGES: Messages = {
@@ -396,6 +402,8 @@ const ES_MESSAGES: Messages = {
     'history.cancel': 'Cancelar',
     'history.unreadable':
         '{{count}} código(s) guardado(s) vienen de una versión más reciente de la aplicación y no se pueden mostrar.',
+    'draft.restored': 'Sigues donde lo dejaste.',
+    'draft.fresh': 'Empezar de cero',
 };
 
 const IT_MESSAGES: Messages = {
@@ -493,6 +501,8 @@ const IT_MESSAGES: Messages = {
     'history.cancel': 'Annulla',
     'history.unreadable':
         '{{count}} codice/i salvato/i provengono da una versione più recente dell’app e non possono essere mostrati.',
+    'draft.restored': 'Riprendi da dove avevi lasciato.',
+    'draft.fresh': 'Ricomincia da capo',
 };
 
 const MESSAGES: Record<Locale, Messages> = {

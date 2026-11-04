@@ -9,13 +9,19 @@
 //   shape a record has. Today there is one: 1.
 import {type DBSchema, type IDBPDatabase, openDB} from 'idb';
 import type {Look} from './look';
-import {CODE_TYPES, type CodeType, type Fields} from './payload';
+import {CODE_TYPES, type CodeType, type Fields, type FieldsByType} from './payload';
 import type {Ec} from './qr';
 import {LOGO_MAX, LOGO_MIN} from './render';
 
 export const DB_NAME = 'justqr';
 export const DB_VERSION = 1;
 const STORE = 'codes';
+/**
+ * The draft lives in localStorage, not IndexedDB: its write is synchronous, so it survives
+ * the page being left or the app being closed (an IndexedDB write started in `pagehide` was
+ * lost on reload, seen in the tests). It is small: the form text and a logo of 256 px at most.
+ */
+const DRAFT_KEY = 'justqr.draft';
 
 export interface SavedCode {
     id: string;
@@ -28,6 +34,16 @@ export interface SavedCode {
     look: Look;
     /** The text inside the code, so a record can be drawn without rebuilding it. */
     payload: string;
+}
+
+/** What the user is typing right now, so a killed app can bring it back. */
+export interface Draft {
+    schema: 1;
+    savedAt: number;
+    type: CodeType;
+    /** The fields of every type, as typed (switching type keeps them). */
+    fields: {[T in CodeType]: FieldsByType[T]};
+    look: Look;
 }
 
 interface Schema extends DBSchema {
@@ -66,18 +82,12 @@ function open(): Promise<IDBPDatabase<Schema>> {
 const isHex = (s: unknown): s is string => typeof s === 'string' && /^#[0-9a-f]{6}$/i.test(s);
 const EC = new Set<string>(['L', 'M', 'Q', 'H']);
 
-/** The record if it is one this app understands, else null. Never throws. */
-export function parseRecord(raw: unknown): SavedCode | null {
+const isType = (t: unknown): t is CodeType => typeof t === 'string' && CODE_TYPES.includes(t as CodeType);
+
+/** A stored look, rebuilt field by field, or null when anything is off. */
+export function parseLook(raw: unknown): Look | null {
     if (!raw || typeof raw !== 'object') return null;
-    const r = raw as Record<string, unknown>;
-    if (r.schema !== 1) return null;
-    if (typeof r.id !== 'string' || !r.id) return null;
-    if (typeof r.createdAt !== 'number' || typeof r.updatedAt !== 'number') return null;
-    if (typeof r.type !== 'string' || !CODE_TYPES.includes(r.type as CodeType)) return null;
-    if (!r.fields || typeof r.fields !== 'object') return null;
-    if (typeof r.payload !== 'string' || !r.payload) return null;
-    const look = r.look as Record<string, unknown> | undefined;
-    if (!look || typeof look !== 'object') return null;
+    const look = raw as Record<string, unknown>;
     if (!isHex(look.fg) || !isHex(look.bg)) return null;
     if (typeof look.margin !== 'number' || typeof look.px !== 'number') return null;
     if (typeof look.ec !== 'string' || !EC.has(look.ec)) return null;
@@ -89,16 +99,66 @@ export function parseRecord(raw: unknown): SavedCode | null {
             return null;
         logo = {href: l.href, ratio: l.ratio};
     }
+    return {fg: look.fg, bg: look.bg, margin: look.margin, px: look.px, ec: look.ec as Ec, logo};
+}
+
+/** The record if it is one this app understands, else null. Never throws. */
+export function parseRecord(raw: unknown): SavedCode | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const r = raw as Record<string, unknown>;
+    if (r.schema !== 1) return null;
+    if (typeof r.id !== 'string' || !r.id) return null;
+    if (typeof r.createdAt !== 'number' || typeof r.updatedAt !== 'number') return null;
+    if (!isType(r.type)) return null;
+    if (!r.fields || typeof r.fields !== 'object') return null;
+    if (typeof r.payload !== 'string' || !r.payload) return null;
+    const look = parseLook(r.look);
+    if (!look) return null;
     return {
         id: r.id,
         schema: 1,
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
-        type: r.type as CodeType,
+        type: r.type,
         fields: r.fields as Fields,
-        look: {fg: look.fg, bg: look.bg, margin: look.margin, px: look.px, ec: look.ec as Ec, logo},
+        look,
         payload: r.payload,
     };
+}
+
+export function parseDraft(raw: unknown): Draft | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const r = raw as Record<string, unknown>;
+    if (r.schema !== 1 || typeof r.savedAt !== 'number' || !isType(r.type)) return null;
+    const fields = r.fields as Record<string, unknown> | undefined;
+    if (!fields || typeof fields !== 'object') return null;
+    for (const type of CODE_TYPES) if (!fields[type] || typeof fields[type] !== 'object') return null;
+    const look = parseLook(r.look);
+    if (!look) return null;
+    return {schema: 1, savedAt: r.savedAt, type: r.type, fields: fields as Draft['fields'], look};
+}
+
+/** There is one draft. Writing replaces it whole. Throws when storage is blocked or full. */
+export function putDraft(draft: Draft): void {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+}
+
+/** The draft, or null when there is none or it cannot be read. Never throws. */
+export function getDraft(): Draft | null {
+    try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        return raw ? parseDraft(JSON.parse(raw)) : null;
+    } catch {
+        return null;
+    }
+}
+
+export function clearDraft(): void {
+    try {
+        localStorage.removeItem(DRAFT_KEY);
+    } catch {
+        // Storage blocked: there was nothing to clear.
+    }
 }
 
 /** Every readable record, newest first. Unreadable ones are counted, not shown. */
