@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <title>Just QR</title>
+  <rect width="48" height="48" rx="10" fill="#0b6e6a"/>
+  <g fill="#ffffff">
+    <path d="M9 9h12v12H9zM12 12v6h6v-6z"/>
+    <path d="M27 9h12v12H27zM30 12v6h6v-6z"/>
+    <path d="M9 27h12v12H9zM12 30v6h6v-6z"/>
+    <rect x="14" y="14" width="2" height="2"/>
+    <rect x="32" y="14" width="2" height="2"/>
+    <rect x="14" y="32" width="2" height="2"/>
+    <path d="M27 27h4v4h-4zM35 27h4v4h-4zM31 31h4v4h-4zM27 35h4v4h-4zM35 35h4v4h-4z"/>
+  </g>
+</svg>

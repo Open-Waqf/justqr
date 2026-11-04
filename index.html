@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <title>Just QR</title>
+    <meta name="description" content="QR codes that never expire. No account, no ads, no tracking. Free, as a waqf."/>
+    <meta name="theme-color" content="#ffffff"/>
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg"/>
+    <link rel="apple-touch-icon" href="./icons/icon-192.png"/>
+    <!-- Nothing may leave the device: the page can only load its own files. The browser
+         tests fail on any request to another host and on any policy violation. -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: blob:;
+        font-src 'self';
+        connect-src 'self';
+        worker-src 'self';
+        manifest-src 'self';
+        object-src 'none';
+        frame-src 'none';
+        base-uri 'self';
+        form-action 'none';
+    "/>
+  <script type="module" crossorigin src="./assets/index-CQybaE79.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BBF3zvYG.css">
+<link rel="manifest" href="./manifest.webmanifest"></head>
+<body>
+<jq-app></jq-app>
+</body>
+</html>
