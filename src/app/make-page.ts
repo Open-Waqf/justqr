@@ -2,8 +2,9 @@ import {css, html, LitElement, nothing, type TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {type MessageKey, t} from '../lib/i18n';
 import {buildPayload, CODE_TYPES, type CodeType, emptyFields, type FieldsByType} from '../lib/payload';
-import {byteLength, type Ec, MAX_BYTES, makeMatrix, TooLongError} from '../lib/qr';
+import {byteLength, type Ec, MAX_BYTES, type Matrix, makeMatrix, TooLongError} from '../lib/qr';
 import {DEFAULT_STYLE, toSvg} from '../lib/render';
+import {canShareFiles, copy, type ExportCode, print, savePng, saveSvg, share} from './exporter';
 
 type AllFields = {[T in CodeType]: FieldsByType[T]};
 
@@ -33,7 +34,7 @@ const ALMOST_FULL = 0.8;
 export type Preview =
     | {kind: 'empty'}
     | {kind: 'too-long'}
-    | {kind: 'code'; svg: string; almostFull: boolean; payload: string};
+    | {kind: 'code'; svg: string; almostFull: boolean; payload: string; matrix: Matrix};
 
 /** What the preview shows for a payload. Exported for the export and history features. */
 export function preview(payload: string, ec: Ec): Preview {
@@ -45,6 +46,7 @@ export function preview(payload: string, ec: Ec): Preview {
             svg: toSvg(m, DEFAULT_STYLE, 512),
             almostFull: byteLength(payload) > MAX_BYTES[ec] * ALMOST_FULL,
             payload,
+            matrix: m,
         };
     } catch (e) {
         if (e instanceof TooLongError) return {kind: 'too-long'};
@@ -57,6 +59,105 @@ export class MakePage extends LitElement {
     static styles = css`
         :host {
             display: block;
+            /* Room for the bottom bar. */
+            padding-bottom: calc(96px + env(safe-area-inset-bottom));
+        }
+        .bar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            max-width: 560px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            background: var(--bg);
+            border-top: 1px solid var(--divider);
+        }
+        .btn {
+            flex: 1;
+            min-height: 48px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            font: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .btn.primary {
+            background: var(--accent);
+            color: var(--on-accent);
+            border-color: var(--accent);
+        }
+        .btn.more {
+            flex: 0 0 56px;
+        }
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: default;
+        }
+        .btn:focus-visible,
+        .menu button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .menu {
+            position: absolute;
+            bottom: calc(100% + 6px);
+            inset-inline-end: 12px;
+            min-width: 200px;
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--divider);
+            background: var(--bg);
+            box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+        }
+        .menu button {
+            display: block;
+            width: 100%;
+            min-height: 44px;
+            padding: 0 12px;
+            border: 0;
+            border-radius: 8px;
+            background: none;
+            color: var(--text);
+            font: inherit;
+            font-size: 15px;
+            text-align: start;
+            cursor: pointer;
+        }
+        .menu button:hover {
+            background: var(--surface);
+        }
+        .toast {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            margin: 0;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--text);
+            color: var(--bg);
+            font-size: 14px;
+            white-space: nowrap;
         }
         .chips {
             display: flex;
@@ -179,16 +280,30 @@ export class MakePage extends LitElement {
         CODE_TYPES.map((k) => [k, emptyFields(k)]),
     ) as AllFields;
     @state() private ec: Ec = 'M';
+    @state() private menuOpen = false;
+    @state() private toast = '';
+    private toastTimer = 0;
+    private readonly canShare = canShareFiles();
+    private onOutside = (e: Event) => {
+        if (
+            this.menuOpen &&
+            !e.composedPath().includes(this.renderRoot.querySelector('.bar') as EventTarget)
+        ) {
+            this.menuOpen = false;
+        }
+    };
 
     private onLocale = () => this.requestUpdate();
 
     connectedCallback(): void {
         super.connectedCallback();
         window.addEventListener('jq-locale', this.onLocale);
+        document.addEventListener('pointerdown', this.onOutside);
     }
 
     disconnectedCallback(): void {
         window.removeEventListener('jq-locale', this.onLocale);
+        document.removeEventListener('pointerdown', this.onOutside);
         super.disconnectedCallback();
     }
 
@@ -297,6 +412,128 @@ export class MakePage extends LitElement {
         );
     }
 
+    private exportCode(p: Preview): ExportCode | null {
+        if (p.kind !== 'code') return null;
+        return {matrix: p.matrix, style: DEFAULT_STYLE, type: this.type, payload: p.payload, px: 1024};
+    }
+
+    private say(key: MessageKey) {
+        this.toast = t(key);
+        clearTimeout(this.toastTimer);
+        this.toastTimer = window.setTimeout(() => {
+            this.toast = '';
+        }, 2500);
+    }
+
+    private async run(action: () => Promise<MessageKey | null> | MessageKey | null) {
+        this.menuOpen = false;
+        try {
+            const done = await action();
+            if (done) this.say(done);
+        } catch {
+            this.say('toast.failed');
+        }
+    }
+
+    private renderBar(code: ExportCode | null): TemplateResult {
+        const off = !code;
+        const item = (
+            id: string,
+            label: MessageKey,
+            action: () => Promise<MessageKey | null> | MessageKey | null,
+        ) =>
+            html`<button role="menuitem" data-testid=${id} @click=${() => this.run(action)}>${t(label)}</button>`;
+        return html`<div
+            class="bar"
+            @keydown=${(e: KeyboardEvent) => {
+                if (e.key === 'Escape' && this.menuOpen) {
+                    this.menuOpen = false;
+                    this.renderRoot.querySelector<HTMLElement>('[data-testid="btn-more"]')?.focus();
+                }
+            }}
+        >
+            ${this.toast ? html`<p class="toast" role="status" data-testid="toast">${this.toast}</p>` : nothing}
+            <button
+                class="btn primary"
+                data-testid="btn-save"
+                ?disabled=${off}
+                @click=${() =>
+                    code &&
+                    this.run(async () => {
+                        await savePng(code);
+                        return 'toast.saved' as const;
+                    })}
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M6 10l6 6 6-6M4 20h16" /></svg>
+                ${t('action.save')}
+            </button>
+            ${
+                this.canShare
+                    ? html`<button
+                          class="btn"
+                          data-testid="btn-share"
+                          ?disabled=${off}
+                          @click=${() =>
+                              code &&
+                              this.run(async () => {
+                                  await share(code);
+                                  return null;
+                              })}
+                      >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <circle cx="18" cy="5" r="3" />
+                              <circle cx="6" cy="12" r="3" />
+                              <circle cx="18" cy="19" r="3" />
+                              <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+                          </svg>
+                          ${t('action.share')}
+                      </button>`
+                    : nothing
+            }
+            <button
+                class="btn more"
+                data-testid="btn-more"
+                aria-label=${t('action.more')}
+                aria-haspopup="menu"
+                aria-expanded=${this.menuOpen ? 'true' : 'false'}
+                ?disabled=${off}
+                @click=${() => {
+                    this.menuOpen = !this.menuOpen;
+                    if (this.menuOpen) {
+                        this.updateComplete.then(() =>
+                            this.renderRoot.querySelector<HTMLElement>('.menu button')?.focus(),
+                        );
+                    }
+                }}
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="5" cy="12" r="1.5" />
+                    <circle cx="12" cy="12" r="1.5" />
+                    <circle cx="19" cy="12" r="1.5" />
+                </svg>
+            </button>
+            ${
+                this.menuOpen && code
+                    ? html`<div class="menu" role="menu" data-testid="menu">
+                          ${item('menu-svg', 'action.save_svg', () => {
+                              saveSvg(code);
+                              return 'toast.saved' as const;
+                          })}
+                          ${item('menu-copy', 'action.copy', async () =>
+                              (await copy(code)) === 'image'
+                                  ? ('toast.copied' as const)
+                                  : ('toast.copied_text' as const),
+                          )}
+                          ${item('menu-print', 'action.print', () => {
+                              print(code);
+                              return null;
+                          })}
+                      </div>`
+                    : nothing
+            }
+        </div>`;
+    }
+
     private renderPreview(p: Preview): TemplateResult {
         if (p.kind === 'code') {
             const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(p.svg)}`;
@@ -336,6 +573,7 @@ export class MakePage extends LitElement {
             <p class="honest" data-testid="honest-line">
                 ${t(HONEST[this.type])} ${t('make.honest_end')}
             </p>
+            ${this.renderBar(this.exportCode(p))}
         `;
     }
 }

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import {createRequire} from 'node:module';
 import jsQR from 'jsqr';
 import {prepareZXingModule, readBarcodes} from 'zxing-wasm/reader';
-import type {Pixels} from '../../../src/lib/render';
+import type {Pixels} from '../../src/lib/render';
 
 const require = createRequire(import.meta.url);
 const wasm = fs.readFileSync(require.resolve('zxing-wasm/reader/zxing_reader.wasm'));
@@ -40,4 +40,13 @@ export function paint(p: Pixels, x: number, y: number, size: number, rgb: [numbe
             p.data[i + 2] = rgb[2];
         }
     }
+}
+
+/** Reads a saved PNG file with both decoders (ZXing reads the file itself, jsQR its pixels). */
+export async function decodePngFile(bytes: Uint8Array): Promise<{jsqr: string | null; zxing: string | null}> {
+    const {PNG} = await import('pngjs');
+    const png = PNG.sync.read(Buffer.from(bytes));
+    const jsqr = decodeJsqr({data: new Uint8ClampedArray(png.data), width: png.width, height: png.height});
+    const results = await readBarcodes(bytes, {formats: ['QRCode']});
+    return {jsqr, zxing: results.find((r) => r.isValid)?.text ?? null};
 }

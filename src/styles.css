@@ -82,3 +82,24 @@ body {
     /* biome-ignore lint/complexity/noImportantStyles: on purpose, see above */
     display: none !important;
 }
+
+/* Printing shows only the code, centred, 8 cm wide (src/app/exporter.ts fills #print-area). */
+#print-area {
+    display: none;
+}
+
+@media print {
+    body > *:not(#print-area) {
+        /* biome-ignore lint/complexity/noImportantStyles: printing must hide the whole app */
+        display: none !important;
+    }
+    #print-area {
+        display: flex;
+        justify-content: center;
+        padding-top: 2cm;
+    }
+    #print-area img {
+        width: 8cm;
+        height: 8cm;
+    }
+}

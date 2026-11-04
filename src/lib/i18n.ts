@@ -55,6 +55,16 @@ const EN_MESSAGES = {
     'make.honest.sms': 'This code holds your message directly.',
     'make.honest.email': 'This code holds your email directly.',
     'make.honest_end': 'It works forever, and nobody can track who scans it.',
+    'action.save': 'Save',
+    'action.share': 'Share',
+    'action.more': 'More options',
+    'action.save_svg': 'Save as SVG',
+    'action.copy': 'Copy',
+    'action.print': 'Print',
+    'toast.saved': 'Saved',
+    'toast.copied': 'Copied',
+    'toast.copied_text': 'Copied as text',
+    'toast.failed': 'That did not work. Please try again.',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;
@@ -101,6 +111,16 @@ const AR_MESSAGES: Messages = {
     'make.honest.sms': 'هذا الرمز يحمل رسالتك مباشرة.',
     'make.honest.email': 'هذا الرمز يحمل بريدك مباشرة.',
     'make.honest_end': 'يعمل إلى الأبد، ولا يمكن لأحد تتبع من يمسحه.',
+    'action.save': 'حفظ',
+    'action.share': 'مشاركة',
+    'action.more': 'خيارات أخرى',
+    'action.save_svg': 'حفظ بصيغة SVG',
+    'action.copy': 'نسخ',
+    'action.print': 'طباعة',
+    'toast.saved': 'تم الحفظ',
+    'toast.copied': 'تم النسخ',
+    'toast.copied_text': 'تم النسخ كنص',
+    'toast.failed': 'لم ينجح ذلك. حاول مرة أخرى.',
 };
 
 const FR_MESSAGES: Messages = {
@@ -145,6 +165,16 @@ const FR_MESSAGES: Messages = {
     'make.honest.sms': 'Ce code contient votre message directement.',
     'make.honest.email': 'Ce code contient votre e-mail directement.',
     'make.honest_end': 'Il fonctionne pour toujours, et personne ne peut savoir qui le scanne.',
+    'action.save': 'Enregistrer',
+    'action.share': 'Partager',
+    'action.more': 'Plus d’options',
+    'action.save_svg': 'Enregistrer en SVG',
+    'action.copy': 'Copier',
+    'action.print': 'Imprimer',
+    'toast.saved': 'Enregistré',
+    'toast.copied': 'Copié',
+    'toast.copied_text': 'Copié en texte',
+    'toast.failed': 'Cela n’a pas marché. Réessayez.',
 };
 
 const ES_MESSAGES: Messages = {
@@ -189,6 +219,16 @@ const ES_MESSAGES: Messages = {
     'make.honest.sms': 'Este código contiene tu mensaje directamente.',
     'make.honest.email': 'Este código contiene tu correo directamente.',
     'make.honest_end': 'Funciona para siempre y nadie puede rastrear quién lo escanea.',
+    'action.save': 'Guardar',
+    'action.share': 'Compartir',
+    'action.more': 'Más opciones',
+    'action.save_svg': 'Guardar como SVG',
+    'action.copy': 'Copiar',
+    'action.print': 'Imprimir',
+    'toast.saved': 'Guardado',
+    'toast.copied': 'Copiado',
+    'toast.copied_text': 'Copiado como texto',
+    'toast.failed': 'No ha funcionado. Inténtalo de nuevo.',
 };
 
 const IT_MESSAGES: Messages = {
@@ -233,6 +273,16 @@ const IT_MESSAGES: Messages = {
     'make.honest.sms': 'Questo codice contiene direttamente il tuo messaggio.',
     'make.honest.email': 'Questo codice contiene direttamente la tua email.',
     'make.honest_end': 'Funziona per sempre e nessuno può sapere chi lo scansiona.',
+    'action.save': 'Salva',
+    'action.share': 'Condividi',
+    'action.more': 'Altre opzioni',
+    'action.save_svg': 'Salva come SVG',
+    'action.copy': 'Copia',
+    'action.print': 'Stampa',
+    'toast.saved': 'Salvato',
+    'toast.copied': 'Copiato',
+    'toast.copied_text': 'Copiato come testo',
+    'toast.failed': 'Non ha funzionato. Riprova.',
 };
 
 const MESSAGES: Record<Locale, Messages> = {

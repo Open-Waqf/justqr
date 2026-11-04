@@ -4,7 +4,7 @@ import {describe, expect, it} from 'vitest';
 import {buildPayload, type CodeType, emptyFields, type Fields} from '../../src/lib/payload';
 import {byteLength, EC_LEVELS, type Ec, MAX_BYTES, makeMatrix} from '../../src/lib/qr';
 import {type CodeStyle, DEFAULT_STYLE, toPixels} from '../../src/lib/render';
-import {decodeBoth} from './support/decode';
+import {decodeBoth} from '../support/decode';
 
 async function roundTrip(text: string, ec: Ec = 'M', style: CodeStyle = DEFAULT_STYLE, scale = 4) {
     const m = makeMatrix(text, ec);

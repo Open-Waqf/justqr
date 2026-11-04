@@ -10,5 +10,8 @@ for (const theme of ['light', 'dark', 'oled'] as const) {
         await page.getByTestId('type-wifi').click();
         await page.getByTestId('f-ssid').fill('Home');
         await expectAccessible(page);
+        // And with the "more" menu open.
+        await page.getByTestId('btn-more').click();
+        await expectAccessible(page);
     });
 }

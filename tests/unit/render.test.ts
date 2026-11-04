@@ -12,7 +12,7 @@ import {
     toPixels,
     toSvg,
 } from '../../src/lib/render';
-import {decodeBoth, paint} from './support/decode';
+import {decodeBoth, paint} from '../support/decode';
 
 /** Reads our own SVG path back into a grid, to prove it draws exactly the matrix. */
 function pathToGrid(d: string, size: number, margin: number): Uint8Array {
