@@ -1,5 +1,20 @@
 // ui.ts: small pieces shared by the screens.
 import {css, LitElement} from 'lit';
+import type {MessageKey} from '../lib/i18n';
+import type {CodeType} from '../lib/payload';
+
+// Written out in full so the translation check sees every key in use.
+const TYPE_LABEL: Record<CodeType, MessageKey> = {
+    link: 'make.type.link',
+    text: 'make.type.text',
+    wifi: 'make.type.wifi',
+    contact: 'make.type.contact',
+    phone: 'make.type.phone',
+    sms: 'make.type.sms',
+    email: 'make.type.email',
+};
+
+export const typeLabel = (type: CodeType): MessageKey => TYPE_LABEL[type];
 
 /** A Lit element that redraws when the language changes. */
 export class LocalizedElement extends LitElement {
@@ -31,8 +46,23 @@ export function nextOf<T>(list: readonly T[], current: T, step: number): T {
     return list[(list.indexOf(current) + step + list.length) % list.length];
 }
 
+/**
+ * "hidden" must beat any display rule (Signer lesson). Page-level CSS does not reach into a
+ * component's shadow tree, so every component includes this.
+ */
+export const hiddenStyles = css`
+    [hidden] {
+        /* biome-ignore lint/complexity/noImportantStyles: on purpose, see above */
+        display: none !important;
+    }
+`;
+
 /** Labels, fields, notices and focus rings, the same on every screen. */
 export const formStyles = css`
+    [hidden] {
+        /* biome-ignore lint/complexity/noImportantStyles: on purpose, see hiddenStyles */
+        display: none !important;
+    }
     label {
         display: block;
         font-size: 13px;

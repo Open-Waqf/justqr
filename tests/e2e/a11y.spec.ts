@@ -26,5 +26,11 @@ for (const theme of ['light', 'dark', 'oled'] as const) {
         // And with the "more" menu open.
         await page.getByTestId('btn-more').click();
         await expectAccessible(page);
+        // History, with one code, its delete button and the clear-all question.
+        await page.keyboard.press('Escape');
+        await Promise.all([page.waitForEvent('download'), page.getByTestId('btn-save').click()]);
+        await page.getByTestId('btn-history').click();
+        await page.getByTestId('history-clear').click();
+        await expectAccessible(page);
     });
 }

@@ -94,6 +94,17 @@ const EN_MESSAGES = {
     'warn.logo_large': 'The logo is large. Some phones may not scan this code. Try a smaller logo.',
     'toast.logo_failed': 'This picture could not be opened. Try another one.',
     'field.more': 'More fields',
+    'nav.back': 'Back',
+    'history.title': 'History',
+    'history.empty': 'Codes you save, share, copy or print are kept here, on this device only.',
+    'history.delete': 'Delete',
+    'history.deleted': 'Deleted',
+    'history.undo': 'Undo',
+    'history.clear': 'Clear all',
+    'history.clear_confirm': 'Delete every saved code?',
+    'history.clear_yes': 'Delete all',
+    'history.cancel': 'Cancel',
+    'history.unreadable': '{{count}} saved code(s) come from a newer version of the app and cannot be shown.',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;
@@ -178,6 +189,17 @@ const AR_MESSAGES: Messages = {
     'warn.logo_large': 'الشعار كبير. قد لا تتمكن بعض الهواتف من مسح هذا الرمز. جرّب شعارًا أصغر.',
     'toast.logo_failed': 'تعذّر فتح هذه الصورة. جرّب صورة أخرى.',
     'field.more': 'حقول أخرى',
+    'nav.back': 'رجوع',
+    'history.title': 'السجل',
+    'history.empty': 'الرموز التي تحفظها أو تشاركها أو تنسخها أو تطبعها تبقى هنا، على هذا الجهاز فقط.',
+    'history.delete': 'حذف',
+    'history.deleted': 'تم الحذف',
+    'history.undo': 'تراجع',
+    'history.clear': 'مسح الكل',
+    'history.clear_confirm': 'حذف كل الرموز المحفوظة؟',
+    'history.clear_yes': 'حذف الكل',
+    'history.cancel': 'إلغاء',
+    'history.unreadable': '{{count}} من الرموز المحفوظة من إصدار أحدث من التطبيق ولا يمكن عرضها.',
 };
 
 const FR_MESSAGES: Messages = {
@@ -263,6 +285,19 @@ const FR_MESSAGES: Messages = {
         'Le logo est grand. Certains téléphones risquent de ne pas scanner ce code. Essayez un logo plus petit.',
     'toast.logo_failed': 'Impossible d’ouvrir cette image. Essayez-en une autre.',
     'field.more': 'Plus de champs',
+    'nav.back': 'Retour',
+    'history.title': 'Historique',
+    'history.empty':
+        'Les codes que vous enregistrez, partagez, copiez ou imprimez restent ici, sur cet appareil seulement.',
+    'history.delete': 'Supprimer',
+    'history.deleted': 'Supprimé',
+    'history.undo': 'Annuler',
+    'history.clear': 'Tout effacer',
+    'history.clear_confirm': 'Supprimer tous les codes enregistrés ?',
+    'history.clear_yes': 'Tout supprimer',
+    'history.cancel': 'Annuler',
+    'history.unreadable':
+        '{{count}} code(s) enregistré(s) viennent d’une version plus récente de l’application et ne peuvent pas être affichés.',
 };
 
 const ES_MESSAGES: Messages = {
@@ -348,6 +383,19 @@ const ES_MESSAGES: Messages = {
         'El logo es grande. Algunos teléfonos quizá no escaneen este código. Prueba con un logo más pequeño.',
     'toast.logo_failed': 'No se ha podido abrir esta imagen. Prueba con otra.',
     'field.more': 'Más campos',
+    'nav.back': 'Atrás',
+    'history.title': 'Historial',
+    'history.empty':
+        'Los códigos que guardas, compartes, copias o imprimes se quedan aquí, solo en este dispositivo.',
+    'history.delete': 'Eliminar',
+    'history.deleted': 'Eliminado',
+    'history.undo': 'Deshacer',
+    'history.clear': 'Borrar todo',
+    'history.clear_confirm': '¿Eliminar todos los códigos guardados?',
+    'history.clear_yes': 'Eliminar todo',
+    'history.cancel': 'Cancelar',
+    'history.unreadable':
+        '{{count}} código(s) guardado(s) vienen de una versión más reciente de la aplicación y no se pueden mostrar.',
 };
 
 const IT_MESSAGES: Messages = {
@@ -433,6 +481,18 @@ const IT_MESSAGES: Messages = {
         'Il logo è grande. Alcuni telefoni potrebbero non leggere questo codice. Prova un logo più piccolo.',
     'toast.logo_failed': 'Impossibile aprire questa immagine. Prova con un’altra.',
     'field.more': 'Altri campi',
+    'nav.back': 'Indietro',
+    'history.title': 'Cronologia',
+    'history.empty': 'I codici che salvi, condividi, copi o stampi restano qui, solo su questo dispositivo.',
+    'history.delete': 'Elimina',
+    'history.deleted': 'Eliminato',
+    'history.undo': 'Annulla',
+    'history.clear': 'Cancella tutto',
+    'history.clear_confirm': 'Eliminare tutti i codici salvati?',
+    'history.clear_yes': 'Elimina tutto',
+    'history.cancel': 'Annulla',
+    'history.unreadable':
+        '{{count}} codice/i salvato/i provengono da una versione più recente dell’app e non possono essere mostrati.',
 };
 
 const MESSAGES: Record<Locale, Messages> = {

@@ -5,22 +5,13 @@ import {DEFAULT_LOOK, effectiveEc, type Look, type LookWarning, lookWarnings} fr
 import {buildPayload, CODE_TYPES, type CodeType, emptyFields, type FieldsByType} from '../lib/payload';
 import {byteLength, MAX_BYTES, type Matrix, makeMatrix, TooLongError} from '../lib/qr';
 import {toSvg} from '../lib/render';
+import {persist, rememberCode, type SavedCode} from '../lib/store';
 import {canShareFiles, copy, type ExportCode, print, savePng, saveSvg, share} from './exporter';
 import './style-panel';
-import {formStyles, LocalizedElement, nextOf, radioStep} from './ui';
+import {formStyles, LocalizedElement, nextOf, radioStep, typeLabel} from './ui';
 
 type AllFields = {[T in CodeType]: FieldsByType[T]};
 
-// Written out in full so the translation check sees every key in use.
-const TYPE_LABEL: Record<CodeType, MessageKey> = {
-    link: 'make.type.link',
-    text: 'make.type.text',
-    wifi: 'make.type.wifi',
-    contact: 'make.type.contact',
-    phone: 'make.type.phone',
-    sms: 'make.type.sms',
-    email: 'make.type.email',
-};
 const HONEST: Record<CodeType, MessageKey> = {
     link: 'make.honest.link',
     text: 'make.honest.text',
@@ -295,6 +286,28 @@ export class MakePage extends LocalizedElement {
         super.disconnectedCallback();
     }
 
+    /** Shows a saved code again, ready to edit. Any change is saved as a new code. */
+    load(code: SavedCode): void {
+        this.type = code.type;
+        this.fields = {...this.fields, [code.type]: {...code.fields}};
+        this.look = code.look;
+        this.moreContact = false;
+        this.menuOpen = false;
+    }
+
+    private persisted = false;
+
+    /** Keeps the code on this device (history). Called after every save, share, copy or print. */
+    private async remember(): Promise<void> {
+        const payload = this.payload;
+        if (!payload) return;
+        await rememberCode({type: this.type, fields: this.fields[this.type], look: this.look, payload});
+        if (!this.persisted) {
+            this.persisted = true;
+            void persist();
+        }
+    }
+
     get payload(): string {
         return buildPayload(this.type, this.fields[this.type] as never);
     }
@@ -435,10 +448,13 @@ export class MakePage extends LocalizedElement {
         }, 2500);
     }
 
-    private async run(action: () => Promise<MessageKey | null> | MessageKey | null) {
+    /** Runs an export action; when it went through, the code goes into the history. */
+    private async run(action: () => Promise<MessageKey | null | false> | MessageKey | null) {
         this.menuOpen = false;
         try {
             const done = await action();
+            if (done === false) return; // the user backed out (closed the share sheet)
+            await this.remember();
             if (done) this.say(done);
         } catch {
             this.say('toast.failed');
@@ -483,12 +499,7 @@ export class MakePage extends LocalizedElement {
                           class="btn"
                           data-testid="btn-share"
                           ?disabled=${off}
-                          @click=${() =>
-                              code &&
-                              this.run(async () => {
-                                  await share(code);
-                                  return null;
-                              })}
+                          @click=${() => code && this.run(async () => ((await share(code)) ? null : false))}
                       >
                           <svg viewBox="0 0 24 24" aria-hidden="true">
                               <circle cx="18" cy="5" r="3" />
@@ -569,7 +580,7 @@ export class MakePage extends LocalizedElement {
                                 this.type = type;
                             }}
                         >
-                            ${t(TYPE_LABEL[type])}
+                            ${t(typeLabel(type))}
                         </button>`,
                 )}
             </div>
