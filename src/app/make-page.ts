@@ -1,10 +1,13 @@
-import {css, html, LitElement, nothing, type TemplateResult} from 'lit';
+import {css, html, nothing, type TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {type MessageKey, t} from '../lib/i18n';
+import {DEFAULT_LOOK, type Look, type LookWarning, lookWarnings} from '../lib/look';
 import {buildPayload, CODE_TYPES, type CodeType, emptyFields, type FieldsByType} from '../lib/payload';
-import {byteLength, type Ec, MAX_BYTES, type Matrix, makeMatrix, TooLongError} from '../lib/qr';
-import {DEFAULT_STYLE, toSvg} from '../lib/render';
+import {byteLength, MAX_BYTES, type Matrix, makeMatrix, TooLongError} from '../lib/qr';
+import {toSvg} from '../lib/render';
 import {canShareFiles, copy, type ExportCode, print, savePng, saveSvg, share} from './exporter';
+import './style-panel';
+import {formStyles, LocalizedElement, nextOf, radioStep} from './ui';
 
 type AllFields = {[T in CodeType]: FieldsByType[T]};
 
@@ -28,6 +31,12 @@ const HONEST: Record<CodeType, MessageKey> = {
     email: 'make.honest.email',
 };
 
+const WARNING: Record<LookWarning, MessageKey> = {
+    'low-contrast': 'warn.low_contrast',
+    inverted: 'warn.inverted',
+    'no-margin': 'warn.no_margin',
+};
+
 /** Share of the capacity above which the "almost full" hint shows. */
 const ALMOST_FULL = 0.8;
 
@@ -37,14 +46,14 @@ export type Preview =
     | {kind: 'code'; svg: string; almostFull: boolean; payload: string; matrix: Matrix};
 
 /** What the preview shows for a payload. Exported for the export and history features. */
-export function preview(payload: string, ec: Ec): Preview {
+export function preview(payload: string, look: Look): Preview {
     if (!payload) return {kind: 'empty'};
     try {
-        const m = makeMatrix(payload, ec);
+        const m = makeMatrix(payload, look.ec);
         return {
             kind: 'code',
-            svg: toSvg(m, DEFAULT_STYLE, 512),
-            almostFull: byteLength(payload) > MAX_BYTES[ec] * ALMOST_FULL,
+            svg: toSvg(m, look, 512),
+            almostFull: byteLength(payload) > MAX_BYTES[look.ec] * ALMOST_FULL,
             payload,
             matrix: m,
         };
@@ -55,8 +64,10 @@ export function preview(payload: string, ec: Ec): Preview {
 }
 
 @customElement('jq-make')
-export class MakePage extends LitElement {
-    static styles = css`
+export class MakePage extends LocalizedElement {
+    static styles = [
+        formStyles,
+        css`
         :host {
             display: block;
             /* Room for the bottom bar. */
@@ -181,33 +192,6 @@ export class MakePage extends LitElement {
             color: var(--on-accent);
             font-weight: 600;
         }
-        .chip:focus-visible,
-        input:focus-visible,
-        select:focus-visible,
-        textarea:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-        label {
-            display: block;
-            font-size: 13px;
-            color: var(--muted);
-            margin: 10px 0 4px;
-        }
-        input,
-        select,
-        textarea {
-            box-sizing: border-box;
-            width: 100%;
-            min-height: 44px;
-            padding: 10px 12px;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            background: var(--bg);
-            color: var(--text);
-            font: inherit;
-            font-size: 16px;
-        }
         textarea {
             min-height: 96px;
             resize: vertical;
@@ -238,6 +222,7 @@ export class MakePage extends LitElement {
             aspect-ratio: 1;
             border-radius: 12px;
             border: 1px solid var(--divider);
+            /* The code draws its own background; this only shows behind the empty state. */
             background: #ffffff;
             display: grid;
             place-items: center;
@@ -256,16 +241,6 @@ export class MakePage extends LitElement {
             line-height: 1.4;
             color: #5b6470;
         }
-        .notice {
-            border-radius: 10px;
-            padding: 10px 12px;
-            font-size: 14px;
-            line-height: 1.4;
-            margin: 8px 0;
-            background: var(--warn-bg);
-            color: var(--warn-text);
-            border: 1px solid var(--warn-line);
-        }
         .honest {
             text-align: center;
             font-size: 14px;
@@ -273,13 +248,14 @@ export class MakePage extends LitElement {
             color: var(--muted);
             margin: 8px 0 12px;
         }
-    `;
+    `,
+    ];
 
     @state() private type: CodeType = 'link';
     @state() private fields: AllFields = Object.fromEntries(
         CODE_TYPES.map((k) => [k, emptyFields(k)]),
     ) as AllFields;
-    @state() private ec: Ec = 'M';
+    @state() private look: Look = DEFAULT_LOOK;
     @state() private menuOpen = false;
     @state() private toast = '';
     private toastTimer = 0;
@@ -293,16 +269,12 @@ export class MakePage extends LitElement {
         }
     };
 
-    private onLocale = () => this.requestUpdate();
-
     connectedCallback(): void {
         super.connectedCallback();
-        window.addEventListener('jq-locale', this.onLocale);
         document.addEventListener('pointerdown', this.onOutside);
     }
 
     disconnectedCallback(): void {
-        window.removeEventListener('jq-locale', this.onLocale);
         document.removeEventListener('pointerdown', this.onOutside);
         super.disconnectedCallback();
     }
@@ -399,13 +371,9 @@ export class MakePage extends LitElement {
     }
 
     private onTypeKey(e: KeyboardEvent) {
-        // Arrow keys move between types, like any radio group (mirrored in right-to-left).
-        const rtl = getComputedStyle(this).direction === 'rtl';
-        const step = {ArrowRight: rtl ? -1 : 1, ArrowLeft: rtl ? 1 : -1, ArrowDown: 1, ArrowUp: -1}[e.key];
+        const step = radioStep(e, this);
         if (!step) return;
-        e.preventDefault();
-        const next =
-            CODE_TYPES[(CODE_TYPES.indexOf(this.type) + step + CODE_TYPES.length) % CODE_TYPES.length];
+        const next = nextOf(CODE_TYPES, this.type, step);
         this.type = next;
         this.updateComplete.then(() =>
             this.renderRoot.querySelector<HTMLElement>(`[data-testid="type-${next}"]`)?.focus(),
@@ -414,7 +382,7 @@ export class MakePage extends LitElement {
 
     private exportCode(p: Preview): ExportCode | null {
         if (p.kind !== 'code') return null;
-        return {matrix: p.matrix, style: DEFAULT_STYLE, type: this.type, payload: p.payload, px: 1024};
+        return {matrix: p.matrix, style: this.look, type: this.type, payload: p.payload, px: this.look.px};
     }
 
     private say(key: MessageKey) {
@@ -543,7 +511,8 @@ export class MakePage extends LitElement {
     }
 
     render() {
-        const p = preview(this.payload, this.ec);
+        const p = preview(this.payload, this.look);
+        const warnings = p.kind === 'code' ? lookWarnings(this.look) : [];
         return html`
             <div class="chips" role="radiogroup" aria-label=${t('make.types')} @keydown=${this.onTypeKey}>
                 ${CODE_TYPES.map(
@@ -570,9 +539,16 @@ export class MakePage extends LitElement {
                     ? html`<p class="notice" data-testid="almost-full">${t('make.almost_full')}</p>`
                     : nothing
             }
+            ${warnings.map((w) => html`<p class="notice" data-testid=${`warn-${w}`}>${t(WARNING[w])}</p>`)}
             <p class="honest" data-testid="honest-line">
                 ${t(HONEST[this.type])} ${t('make.honest_end')}
             </p>
+            <jq-style
+                .look=${this.look}
+                @look-change=${(e: CustomEvent<Look>) => {
+                    this.look = e.detail;
+                }}
+            ></jq-style>
             ${this.renderBar(this.exportCode(p))}
         `;
     }

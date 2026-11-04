@@ -65,6 +65,25 @@ const EN_MESSAGES = {
     'toast.copied': 'Copied',
     'toast.copied_text': 'Copied as text',
     'toast.failed': 'That did not work. Please try again.',
+    'style.title': 'Style',
+    'style.default': 'Default',
+    'style.custom': 'Custom',
+    'style.colours': 'Colours',
+    'style.fg': 'Code',
+    'style.bg': 'Background',
+    'style.size': 'Image size',
+    'style.size_help': 'The size of the saved image. The code itself is the same.',
+    'style.ec': 'Error correction',
+    'style.ec_help':
+        'How much of the code can be dirty or covered and still scan: L 7%, M 15%, Q 25%, H 30%. Higher makes a denser code.',
+    'style.margin': 'Margin',
+    'style.margin_help': 'White space around the code, in squares. Scanners need it: 4 is the standard.',
+    'style.reset': 'Back to default',
+    'warn.low_contrast':
+        'The colours are too close. Some phones may not scan this code. Use a darker code or a lighter background.',
+    'warn.inverted':
+        'The code is lighter than its background. Many phones only scan dark codes on a light background.',
+    'warn.no_margin': 'No margin: leave white space around the code wherever you print it.',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;
@@ -121,6 +140,24 @@ const AR_MESSAGES: Messages = {
     'toast.copied': 'تم النسخ',
     'toast.copied_text': 'تم النسخ كنص',
     'toast.failed': 'لم ينجح ذلك. حاول مرة أخرى.',
+    'style.title': 'التنسيق',
+    'style.default': 'افتراضي',
+    'style.custom': 'مخصص',
+    'style.colours': 'الألوان',
+    'style.fg': 'الرمز',
+    'style.bg': 'الخلفية',
+    'style.size': 'حجم الصورة',
+    'style.size_help': 'حجم الصورة المحفوظة. الرمز نفسه لا يتغير.',
+    'style.ec': 'تصحيح الأخطاء',
+    'style.ec_help':
+        'كم يمكن أن يتسخ الرمز أو يُغطى ويبقى قابلًا للمسح: L ‏7%، M ‏15%، Q ‏25%، H ‏30%. القيمة الأعلى تجعل الرمز أكثف.',
+    'style.margin': 'الهامش',
+    'style.margin_help': 'مساحة بيضاء حول الرمز، بعدد المربعات. الماسحات تحتاجها: 4 هو المعيار.',
+    'style.reset': 'العودة إلى الافتراضي',
+    'warn.low_contrast':
+        'اللونان متقاربان جدًا. قد لا تتمكن بعض الهواتف من مسح هذا الرمز. استخدم رمزًا أغمق أو خلفية أفتح.',
+    'warn.inverted': 'الرمز أفتح من خلفيته. كثير من الهواتف لا تمسح إلا الرموز الداكنة على خلفية فاتحة.',
+    'warn.no_margin': 'بلا هامش: اترك مساحة بيضاء حول الرمز أينما طبعته.',
 };
 
 const FR_MESSAGES: Messages = {
@@ -175,6 +212,26 @@ const FR_MESSAGES: Messages = {
     'toast.copied': 'Copié',
     'toast.copied_text': 'Copié en texte',
     'toast.failed': 'Cela n’a pas marché. Réessayez.',
+    'style.title': 'Style',
+    'style.default': 'Par défaut',
+    'style.custom': 'Personnalisé',
+    'style.colours': 'Couleurs',
+    'style.fg': 'Code',
+    'style.bg': 'Fond',
+    'style.size': 'Taille de l’image',
+    'style.size_help': 'La taille de l’image enregistrée. Le code lui-même ne change pas.',
+    'style.ec': 'Correction d’erreurs',
+    'style.ec_help':
+        'La part du code qui peut être salie ou cachée sans gêner le scan : L 7 %, M 15 %, Q 25 %, H 30 %. Plus c’est haut, plus le code est dense.',
+    'style.margin': 'Marge',
+    'style.margin_help':
+        'L’espace blanc autour du code, en carrés. Les scanners en ont besoin : 4 est la norme.',
+    'style.reset': 'Revenir au style par défaut',
+    'warn.low_contrast':
+        'Les couleurs sont trop proches. Certains téléphones risquent de ne pas scanner ce code. Prenez un code plus foncé ou un fond plus clair.',
+    'warn.inverted':
+        'Le code est plus clair que son fond. Beaucoup de téléphones ne scannent que des codes foncés sur fond clair.',
+    'warn.no_margin': 'Pas de marge : laissez un espace blanc autour du code là où vous l’imprimez.',
 };
 
 const ES_MESSAGES: Messages = {
@@ -229,6 +286,26 @@ const ES_MESSAGES: Messages = {
     'toast.copied': 'Copiado',
     'toast.copied_text': 'Copiado como texto',
     'toast.failed': 'No ha funcionado. Inténtalo de nuevo.',
+    'style.title': 'Estilo',
+    'style.default': 'Predeterminado',
+    'style.custom': 'Personalizado',
+    'style.colours': 'Colores',
+    'style.fg': 'Código',
+    'style.bg': 'Fondo',
+    'style.size': 'Tamaño de la imagen',
+    'style.size_help': 'El tamaño de la imagen guardada. El código en sí no cambia.',
+    'style.ec': 'Corrección de errores',
+    'style.ec_help':
+        'Cuánto del código puede estar sucio o tapado y aún escanearse: L 7 %, M 15 %, Q 25 %, H 30 %. Cuanto más alto, más denso es el código.',
+    'style.margin': 'Margen',
+    'style.margin_help':
+        'Espacio blanco alrededor del código, en cuadros. Los escáneres lo necesitan: 4 es el estándar.',
+    'style.reset': 'Volver al predeterminado',
+    'warn.low_contrast':
+        'Los colores están demasiado cerca. Algunos teléfonos quizá no escaneen este código. Usa un código más oscuro o un fondo más claro.',
+    'warn.inverted':
+        'El código es más claro que su fondo. Muchos teléfonos solo escanean códigos oscuros sobre fondo claro.',
+    'warn.no_margin': 'Sin margen: deja espacio blanco alrededor del código donde lo imprimas.',
 };
 
 const IT_MESSAGES: Messages = {
@@ -283,6 +360,26 @@ const IT_MESSAGES: Messages = {
     'toast.copied': 'Copiato',
     'toast.copied_text': 'Copiato come testo',
     'toast.failed': 'Non ha funzionato. Riprova.',
+    'style.title': 'Stile',
+    'style.default': 'Predefinito',
+    'style.custom': 'Personalizzato',
+    'style.colours': 'Colori',
+    'style.fg': 'Codice',
+    'style.bg': 'Sfondo',
+    'style.size': 'Dimensione dell’immagine',
+    'style.size_help': 'La dimensione dell’immagine salvata. Il codice in sé non cambia.',
+    'style.ec': 'Correzione degli errori',
+    'style.ec_help':
+        'Quanto del codice può essere sporco o coperto e funzionare ancora: L 7%, M 15%, Q 25%, H 30%. Più è alto, più il codice è fitto.',
+    'style.margin': 'Margine',
+    'style.margin_help':
+        'Spazio bianco intorno al codice, in quadretti. Gli scanner ne hanno bisogno: 4 è lo standard.',
+    'style.reset': 'Torna al predefinito',
+    'warn.low_contrast':
+        'I colori sono troppo vicini. Alcuni telefoni potrebbero non leggere questo codice. Usa un codice più scuro o uno sfondo più chiaro.',
+    'warn.inverted':
+        'Il codice è più chiaro del suo sfondo. Molti telefoni leggono solo codici scuri su sfondo chiaro.',
+    'warn.no_margin': 'Nessun margine: lascia spazio bianco intorno al codice dove lo stampi.',
 };
 
 const MESSAGES: Record<Locale, Messages> = {
